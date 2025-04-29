@@ -1,0 +1,16 @@
+{
+  "name": "code-daw",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "codemirror": "^5.65.19",
+    "p5": "^2.0.1"
+  }
+}
