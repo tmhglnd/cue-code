@@ -3,6 +3,7 @@ let zoomlevel = 20;
 // let zoomslider;
 
 let gridheight = 250;
+let gridWidth = 200;
 
 let regions = [];
 let transport;
@@ -16,26 +17,16 @@ let addFilesButton;
 
 function setup(){
 	createCanvas(windowWidth, windowHeight);
-
 	document.body.id = 'main';
 
 	transport = new Transport();
 
-	// for (let i=0; i<3; i++){
-	// 	regions.push(new Region());
-	// }
-
 	editor = new Editor();
-
-	// addFilesButton = createButton('add file');
-	// addFilesButton.position(0, -200);
-	// addFilesButton.style('z-index', 2000);
 }
 
 function draw(){
 	background('black');
-
-	translate(focusposition);
+	// translate(focusposition);
 	
 	transport.grid();
 	transport.progress();
@@ -48,9 +39,7 @@ function draw(){
 	});
 	transport.playhead();
 	
-	// regions.forEach(r => r.display());
-
-	transport.timestamp();
+	// transport.timestamp();
 
 	editor.display();
 }
@@ -66,7 +55,7 @@ function mousePressed(){
 			if (e.target.files.length > 0){
 				let read = new FileReader();
 				read.onload = (f) => {
-					regions.push(new Region(x, f.target.result));
+					regions.push(new Region(0, mouseY, f.target.result));
 					// console.log(f.target.result);
 				};
 				read.readAsText(e.target.files[0]);
@@ -107,6 +96,10 @@ function keyPressed(){
 	}
 }
 
+function windowResized(){
+	resizeCanvas(windowWidth, windowHeight);
+}
+
 class Transport {
 	constructor(){
 		this.position = 0;
@@ -135,20 +128,20 @@ class Transport {
 	playhead(){
 		strokeWeight(5);
 		stroke('red');
-		line(this.position / zoomlevel, 0, this.position / zoomlevel, gridheight);
+		// line(this.position / zoomlevel, 0, this.position / zoomlevel, gridheight);
+		line(0, this.position / zoomlevel, gridWidth, this.position / zoomlevel);
 	}
 
  	grid(){
-		let x = 0;
-		while( x < width ){
-			// strokeWeight((i % 4 === 0) ? 3 : 1);
+		let y = 0;
+		while( y < height ){
 			strokeWeight(1);
 			stroke('darkgrey');
-			line(x, 0, x, gridheight);
-			x += 1000 / zoomlevel;
+			// line(x, 0, x, gridheight);
+			line(0, y, gridWidth, y);
+			// x += 1000 / zoomlevel;
+			y += 1000 / zoomlevel;
 		}
-		// for (let i=0; i<width*zoomlevel; i++){
-		// }
 	}
 
 	timestamp(){
@@ -164,23 +157,29 @@ class Transport {
 }
 
 class Region {
-	constructor(x=0, txt=''){
+	constructor(x=0, y=0, txt=''){
 		this.x = x;
-		// this.y = random(height);
-		this.y = 0;
-		this.w = 100;
-		this.h = gridheight;
+		this.y = y;
+		this.w = gridWidth;
+		this.h = 50;
+		// this.h = gridheight;
 		this.selected = false;
 		this.selectionOffset = [ 0, 0 ];
 		this.isPlaying = false;
 
-		this.code = CodeMirror.Doc(txt);
+		this.code = CodeMirror.Doc(txt, 'javascript');
 	}
 
 	draw(){
 		stroke('black');
-		strokeWeight(2);
-		fill('darkgrey');
+		strokeWeight(1);
+		// noStroke();
+		fill('grey');
+		if (this.selected){
+			strokeWeight(3);
+			stroke('white');
+			// fill('lightgrey');
+		}
 		if (this.isPlaying){
 			fill('white');
 		}
@@ -188,16 +187,16 @@ class Region {
 	}
 
 	play(playhead){
-		if (this.inboundsX(playhead) !== this.isPlaying && !this.isPlaying){
+		if (this.inboundsY(playhead) !== this.isPlaying && !this.isPlaying){
 			console.log('eval:', this.getJSON());
 		}
-		this.isPlaying = this.inboundsX(playhead);
+		this.isPlaying = this.inboundsY(playhead);
 	}
 
 	move(){
 		if (this.selected){
-			this.x = constrain(mouseX - this.selectionOffset[0], 0, width-this.w);
-			this.y = constrain(mouseY - this.selectionOffset[1], 0, gridheight-this.h);
+			// this.x = constrain(mouseX - this.selectionOffset[0], 0, width-this.w);
+			this.y = constrain(mouseY - this.selectionOffset[1], 0, height-this.h);
 
 			// if (snap){
 			// 	this.x = this.x 
@@ -237,13 +236,17 @@ class Editor {
 		this.cm = CodeMirror(document.getElementById('editor'), {
 			lineNumbers: true,
 			theme: 'gruvbox-dark',
+			mode: 'javascript',
 			value: ''
 		});
 	}
 
 	display(){
-		this.editor.position(0, gridheight);
-		this.editor.size(width);
+		// this.editor.position(0, gridheight);
+		this.editor.position(gridWidth, 0);
+		// this.editor.size(width);
+		this.editor.size(width - gridWidth);
+		this.cm.setSize('100%', height);
 	}
 
 	setValue(t){
