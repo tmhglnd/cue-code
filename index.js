@@ -39,7 +39,7 @@ function draw(){
 	});
 	transport.playhead();
 	
-	// transport.timestamp();
+	transport.timestamp();
 
 	editor.display();
 }
@@ -50,15 +50,15 @@ function mousePressed(){
 		let input = document.createElement('input');
 		input.style.display = 'none';
 		input.type = 'file';
-		input.multiple = false;
+		input.multiple = true;
 		input.onchange = (e) => {
-			if (e.target.files.length > 0){
+			for (let i = 0; i < e.target.files.length; i++){
 				let read = new FileReader();
 				read.onload = (f) => {
-					regions.push(new Region(0, mouseY, f.target.result));
+					regions.push(new Region(0, mouseY + i * 100, f.target.result));
 					// console.log(f.target.result);
 				};
-				read.readAsText(e.target.files[0]);
+				read.readAsText(e.target.files[i]);
 			}
 			console.log(e.target.files);
 		}
@@ -78,6 +78,15 @@ function mousePressed(){
 
 function mouseDragged(){
 	regions.forEach(r => r.move());
+
+	// transport.movePlayHead();
+}
+
+function mouseWheel(event){
+	if (mouseX > 0 && mouseX < gridWidth){
+		focusposition = Math.min(10000, Math.max(0, focusposition + event.deltaY * 0.5));
+	}
+	// console.log('position', focusposition);
 }
 
 function keyPressed(){
@@ -129,8 +138,14 @@ class Transport {
 		strokeWeight(5);
 		stroke('red');
 		// line(this.position / zoomlevel, 0, this.position / zoomlevel, gridheight);
-		line(0, this.position / zoomlevel, gridWidth, this.position / zoomlevel);
+		line(0, this.position / zoomlevel - focusposition, gridWidth, this.position / zoomlevel - focusposition);
 	}
+
+	// movePlayHead(){
+	// 	if (mouseX > 0 && mouseX < gridWidth && mouseY < this.position + 2 && mouseY > this.position - 2){
+	// 		this.position = mouseY;
+	// 	}
+	// }
 
  	grid(){
 		let y = 0;
@@ -138,7 +153,7 @@ class Transport {
 			strokeWeight(1);
 			stroke('darkgrey');
 			// line(x, 0, x, gridheight);
-			line(0, y, gridWidth, y);
+			line(0, y - focusposition, gridWidth, y - focusposition);
 			// x += 1000 / zoomlevel;
 			y += 1000 / zoomlevel;
 		}
@@ -147,12 +162,15 @@ class Transport {
 	timestamp(){
 		noStroke();
 		fill('white');
+		textFont('courier new');
+		
+		textAlign(RIGHT, TOP);
 		textSize(32);
 
-		let ms = Math.floor(this.position % 1000);
+		let ms = (Math.floor(this.position % 1000)).toString().padStart(3, 0);
 		let sec = (Math.floor((this.position / 1000) % 60)).toString().padStart(2, 0);
 		let min = (Math.floor(this.position / 60000)).toString().padStart(2, 0);
-		text(`${min}:${sec}.${ms}`, 20, height-20);
+		text(`${min}:${sec}.${ms}`, width - 10, 10);
 	}
 }
 
@@ -183,10 +201,11 @@ class Region {
 		if (this.isPlaying){
 			fill('white');
 		}
-		rect(this.x, this.y, this.w, this.h);
+		rect(this.x, this.y - focusposition, this.w, this.h);
 	}
 
 	play(playhead){
+		playhead -= focusposition;
 		if (this.inboundsY(playhead) !== this.isPlaying && !this.isPlaying){
 			console.log('eval:', this.getJSON());
 		}
@@ -196,7 +215,8 @@ class Region {
 	move(){
 		if (this.selected){
 			// this.x = constrain(mouseX - this.selectionOffset[0], 0, width-this.w);
-			this.y = constrain(mouseY - this.selectionOffset[1], 0, height-this.h);
+			// this.y = constrain(mouseY - this.selectionOffset[1], 0, height-this.h);
+			this.y = Math.max(0, mouseY - this.selectionOffset[1]);
 
 			// if (snap){
 			// 	this.x = this.x 
@@ -215,7 +235,7 @@ class Region {
 	}
 
 	inboundsY(y){
-		return y > this.y && y < this.y+this.h;
+		return y > this.y - focusposition && y < this.y+this.h - focusposition;
 	}
 
 	getJSON(){
@@ -243,7 +263,7 @@ class Editor {
 
 	display(){
 		// this.editor.position(0, gridheight);
-		this.editor.position(gridWidth, 0);
+		this.editor.position(gridWidth, 50);
 		// this.editor.size(width);
 		this.editor.size(width - gridWidth);
 		this.cm.setSize('100%', height);
