@@ -1,8 +1,4 @@
 
-// let zoomlevel = 20;
-let zoomlevel = 1;
-// let zoomslider;
-
 let gridheight = 250;
 let gridWidth = 200;
 
@@ -34,7 +30,7 @@ function draw(){
 
 	regions.forEach(r => {
 		if (transport.running){
-			r.play(transport.position / zoomlevel);
+			r.play(transport.position);
 		}
 		r.draw();
 	});
@@ -56,7 +52,8 @@ function mousePressed(){
 			for (let i = 0; i < e.target.files.length; i++){
 				let read = new FileReader();
 				read.onload = (f) => {
-					regions.push(new Region(0, mouseY + i * 100, f.target.result));
+					let pos = transport.pixelToMs(mouseY + i * 100);
+					regions.push(new Region(pos, f.target.result, transport));
 				};
 				read.readAsText(e.target.files[i]);
 			}
@@ -104,11 +101,13 @@ function keyPressed(){
 	}
 
 	else if (keyIsDown(CONTROL) && key === '='){
-		zoomlevel = Math.max(1, zoomlevel - 1);
+		transport.zoomIn();
+		// zoomlevel = Math.max(1, zoomlevel - 1);
 	}
 	
 	else if (keyIsDown(CONTROL) && key === '-'){
-		zoomlevel++;
+		transport.zoomOut();
+		// zoomlevel++;
 	}
 	// console.log(key);
 }
@@ -128,6 +127,7 @@ class Transport {
 		this.running = false;
 		this.startTime = 0;
 		this.prevTime = 0;
+		this.zoomlevel = 25;
 	}
 
 	start(){
@@ -151,7 +151,7 @@ class Transport {
 		strokeWeight(5);
 		stroke('red');
 		// line(this.position / zoomlevel, 0, this.position / zoomlevel, gridheight);
-		line(0, this.position / zoomlevel - focusposition, gridWidth, this.position / zoomlevel - focusposition);
+		line(0, this.position / this.zoomlevel - focusposition, gridWidth, this.position / this.zoomlevel - focusposition);
 	}
 
 	// movePlayHead(){
@@ -160,8 +160,16 @@ class Transport {
 	// 	}
 	// }
 
+	zoomIn(){
+		this.zoomlevel = Math.max(1, this.zoomlevel - 1);
+	}
+
+	zoomOut(){
+		this.zoomlevel++;
+	}
+
  	grid(){
-		let stepsize = 1000 / zoomlevel;
+		let stepsize = 1000 / this.zoomlevel;
 		let numlines = Math.ceil(height / stepsize);
 
 		for (let l = 0; l < numlines; l++){
@@ -185,12 +193,21 @@ class Transport {
 		let min = (Math.floor(this.position / 60000)).toString().padStart(2, 0);
 		text(`${min}:${sec}.${ms}`, width - 10, 10);
 	}
+
+	pixelToMs(y){
+		return (y + focusposition) / 1000 * this.zoomlevel; 
+	}
+
+	msToPixel(ms){
+		return ms / this.zoomlevel * 1000 - focusposition; 
+	}
 }
 
 class Region {
-	constructor(x=0, y=0, txt=''){
-		this.x = x;
-		this.y = y;
+	constructor(t=0, txt='', transport){
+		this.x = 0;
+		this.y = 0;
+		this.time = t;
 		this.w = gridWidth;
 		this.h = 50;
 		// this.h = gridheight;
@@ -199,6 +216,7 @@ class Region {
 		this.isPlaying = false;
 
 		this.code = CodeMirror.Doc(txt, 'javascript');
+		this.transport = transport;
 	}
 
 	draw(){
@@ -214,11 +232,13 @@ class Region {
 		if (this.isPlaying){
 			fill('white');
 		}
-		rect(this.x, this.y - focusposition, this.w, this.h);
+		this.y = this.transport.msToPixel(this.time);
+		rect(this.x, this.y, this.w, this.h);
 	}
 
 	play(playhead){
-		playhead -= focusposition;
+		playhead = this.transport.msToPixel(playhead);
+		// playhead -= focusposition;
 		if (this.inboundsY(playhead) !== this.isPlaying && !this.isPlaying){
 			console.log('eval:', this.getJSON());
 		}
@@ -229,7 +249,9 @@ class Region {
 		if (this.selected){
 			// this.x = constrain(mouseX - this.selectionOffset[0], 0, width-this.w);
 			// this.y = constrain(mouseY - this.selectionOffset[1], 0, height-this.h);
-			this.y = Math.max(0, mouseY - this.selectionOffset[1]);
+			// this.y = Math.max(0, mouseY - this.selectionOffset[1]);
+
+			this.time = Math.max(0, this.transport.pixelToMs(mouseY - this.selectionOffset[1]));
 
 			// if (snap){
 			// 	this.x = this.x 
@@ -244,16 +266,16 @@ class Region {
 	}
 
 	inboundsX(x){
-		return x > this.x && x < this.x+this.w;
+		return x > this.x && x < this.x + this.w;
 	}
 
 	inboundsY(y){
-		return y > this.y - focusposition && y < this.y+this.h - focusposition;
+		return y > this.y && y < this.y + this.h;
 	}
 
 	getJSON(){
 		return {
-			time_ms: (this.x / 1000) * zoomlevel,
+			time_ms: (this.x / 1000) * transport.zoomlevel,
 			code: this.code.getValue()
 		}
 	}
