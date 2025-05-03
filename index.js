@@ -1,5 +1,6 @@
 
-let zoomlevel = 20;
+// let zoomlevel = 20;
+let zoomlevel = 1;
 // let zoomslider;
 
 let gridheight = 250;
@@ -56,7 +57,6 @@ function mousePressed(){
 				let read = new FileReader();
 				read.onload = (f) => {
 					regions.push(new Region(0, mouseY + i * 100, f.target.result));
-					// console.log(f.target.result);
 				};
 				read.readAsText(e.target.files[i]);
 			}
@@ -90,9 +90,8 @@ function mouseWheel(event){
 }
 
 function keyPressed(){
-	if (document.activeElement.id !== 'main') return;
-
-	if (keyCode === 32){
+	if (document.activeElement.id !== 'main') { return }
+	else if (keyCode === 32){
 		if (transport.running){ 
 			transport.stop();
 		} else {
@@ -100,13 +99,27 @@ function keyPressed(){
 		}
 	}
 
-	if (key === 'w'){
+	else if (key === 'w'){
 		transport.position = 0;
 	}
+
+	else if (keyIsDown(CONTROL) && key === '='){
+		zoomlevel = Math.max(1, zoomlevel - 1);
+	}
+	
+	else if (keyIsDown(CONTROL) && key === '-'){
+		zoomlevel++;
+	}
+	// console.log(key);
 }
 
 function windowResized(){
 	resizeCanvas(windowWidth, windowHeight);
+}
+
+function wrap(a, lo, hi){
+	let r = hi - lo;
+	return ((((a - lo) % r) + r) % r) + lo;
 }
 
 class Transport {
@@ -148,14 +161,14 @@ class Transport {
 	// }
 
  	grid(){
-		let y = 0;
-		while( y < height ){
+		let stepsize = 1000 / zoomlevel;
+		let numlines = Math.ceil(height / stepsize);
+
+		for (let l = 0; l < numlines; l++){
+			let p = wrap(l * stepsize - focusposition, 0, numlines * stepsize);
 			strokeWeight(1);
 			stroke('darkgrey');
-			// line(x, 0, x, gridheight);
-			line(0, y - focusposition, gridWidth, y - focusposition);
-			// x += 1000 / zoomlevel;
-			y += 1000 / zoomlevel;
+			line(0, p, gridWidth, p);
 		}
 	}
 
