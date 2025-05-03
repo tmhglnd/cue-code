@@ -8,8 +8,6 @@ let editor;
 
 let snap = true;
 
-let focusposition = 0;
-
 let addFilesButton;
 
 function setup(){
@@ -23,7 +21,6 @@ function setup(){
 
 function draw(){
 	background('black');
-	// translate(focusposition);
 	
 	transport.grid();
 	transport.progress();
@@ -81,9 +78,8 @@ function mouseDragged(){
 
 function mouseWheel(event){
 	if (mouseX > 0 && mouseX < gridWidth){
-		focusposition = Math.min(10000, Math.max(0, focusposition + event.deltaY * 0.5));
+		transport.moveFocus(event.deltaY);
 	}
-	// console.log('position', focusposition);
 }
 
 function keyPressed(){
@@ -99,16 +95,13 @@ function keyPressed(){
 	else if (key === 'w'){
 		transport.position = 0;
 	}
-
 	else if (keyIsDown(CONTROL) && key === '='){
 		transport.zoomIn();
-		// zoomlevel = Math.max(1, zoomlevel - 1);
 	}
-	
 	else if (keyIsDown(CONTROL) && key === '-'){
 		transport.zoomOut();
-		// zoomlevel++;
 	}
+
 	// console.log(key);
 }
 
@@ -127,12 +120,13 @@ class Transport {
 		this.running = false;
 		this.startTime = 0;
 		this.prevTime = 0;
+
 		this.zoomlevel = 25;
+		this.focus = 0;
 	}
 
 	start(){
 		this.running = true;
-		// this.startTime = this.position;
 		this.prevTime = millis();
 	}
 
@@ -151,7 +145,7 @@ class Transport {
 		strokeWeight(5);
 		stroke('red');
 		// line(this.position / zoomlevel, 0, this.position / zoomlevel, gridheight);
-		line(0, this.position / this.zoomlevel - focusposition, gridWidth, this.position / this.zoomlevel - focusposition);
+		line(0, this.position / this.zoomlevel - this.focus, gridWidth, this.position / this.zoomlevel - this.focus);
 	}
 
 	// movePlayHead(){
@@ -168,12 +162,16 @@ class Transport {
 		this.zoomlevel++;
 	}
 
+	moveFocus(delta){
+		this.focus = Math.min(10000, Math.max(0, this.focus + delta * 0.5));
+	}
+
  	grid(){
 		let stepsize = 1000 / this.zoomlevel;
 		let numlines = Math.ceil(height / stepsize);
 
 		for (let l = 0; l < numlines; l++){
-			let p = wrap(l * stepsize - focusposition, 0, numlines * stepsize);
+			let p = wrap(l * stepsize - this.focus, 0, numlines * stepsize);
 			strokeWeight(1);
 			stroke('darkgrey');
 			line(0, p, gridWidth, p);
@@ -195,11 +193,11 @@ class Transport {
 	}
 
 	pixelToMs(y){
-		return (y + focusposition) / 1000 * this.zoomlevel; 
+		return (y + this.focus) / 1000 * this.zoomlevel; 
 	}
 
 	msToPixel(ms){
-		return ms / this.zoomlevel * 1000 - focusposition; 
+		return ms / this.zoomlevel * 1000 - this.focus; 
 	}
 }
 
@@ -238,7 +236,7 @@ class Region {
 
 	play(playhead){
 		playhead = this.transport.msToPixel(playhead);
-		// playhead -= focusposition;
+		
 		if (this.inboundsY(playhead) !== this.isPlaying && !this.isPlaying){
 			console.log('eval:', this.getJSON());
 		}
