@@ -123,20 +123,18 @@ function exportSession(){
 		// name: 'empty',
 		// date: 'today',
 		// length: 10,
-		// zoom: 25,
+		zoom: transport.zoomlevel,
 		// tempo: 100,
 		regions: []
 	};
 
 	regions.forEach((r) => {
-		file.regions.push({
-			id: r.id,
-			time: r.time,
-			code: r.code.getValue()
-		});
+		file.regions.push(r.getJSON());
 	});
 
-	// console.log(JSON.stringify(file));
+	console.log(file);
+
+	// new File([this.cm.getValue()], `${f}.txt`, { type: 'text/plain;charset=utf-8' })
 }
 
 // function importSession(){
@@ -258,15 +256,19 @@ class Region {
 			stroke('white');
 			// fill('lightgrey');
 		}
-		if (this.isPlaying){
-			fill('white');
-		}
 		this.y = this.transport.msToPixel(this.time);
 		rect(this.x, this.y, this.w, this.h);
+
+		if (this.isPlaying > 0){
+			fill(255, 255, 255, this.isPlaying * 255);
+			rect(this.x, this.y, this.w, this.h);
+			this.isPlaying -= 0.02;
+		}
 	}
 
 	play(playhead){
 		if (this._playhead < this.time && playhead > this.time){
+			this.isPlaying = 1;
 			console.log('eval:', this.getJSON());
 		}
 		this._playhead = playhead;
