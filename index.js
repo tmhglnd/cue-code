@@ -6,10 +6,6 @@ let regions = [];
 let transport;
 let editor;
 
-let snap = true;
-
-let addFilesButton;
-
 function setup(){
 	createCanvas(windowWidth, windowHeight);
 	document.body.id = 'main';
@@ -40,7 +36,6 @@ function draw(){
 
 function mousePressed(){
 	if (keyIsDown(SHIFT)){
-		let x = mouseX;
 		let input = document.createElement('input');
 		input.style.display = 'none';
 		input.type = 'file';
@@ -54,7 +49,6 @@ function mousePressed(){
 				};
 				read.readAsText(e.target.files[i]);
 			}
-			// console.log(e.target.files);
 		}
 		input.click();
 	}
@@ -62,9 +56,7 @@ function mousePressed(){
 	regions.forEach(r => r.selected = false);
 	for (let r=regions.length-1; r>=0; r--){
 		if (regions[r].select()) {
-			// console.log(regions[r].code);
 			editor.swapDoc(regions[r].code);
-			// regions[r].bindToEditor(editor);
 			return;
 		}
 	}
@@ -120,9 +112,6 @@ function wrap(a, lo, hi){
 
 function exportSession(){
 	let file = {
-		// name: 'empty',
-		// date: 'today',
-		// length: 10,
 		zoom: transport.zoomlevel,
 		// tempo: 100,
 		regions: []
@@ -137,8 +126,9 @@ function exportSession(){
 	// new File([this.cm.getValue()], `${f}.txt`, { type: 'text/plain;charset=utf-8' })
 }
 
-// function importSession(){
-// }
+function importSession(){
+	return;
+}
 
 class Transport {
 	constructor(){
@@ -170,7 +160,6 @@ class Transport {
 	playhead(){
 		strokeWeight(5);
 		stroke('red');
-		// line(this.position / zoomlevel, 0, this.position / zoomlevel, gridheight);
 		line(0, this.position / this.zoomlevel - this.focus, gridWidth, this.position / this.zoomlevel - this.focus);
 	}
 
@@ -272,26 +261,11 @@ class Region {
 			console.log('eval:', this.getJSON());
 		}
 		this._playhead = playhead;
-
-		// let p = this.transport.msToPixel(playhead);
-		// // playhead = this.transport.msToPixel(playhead);		
-		// if (this.inboundsY(p) !== this.isPlaying && !this.isPlaying){
-		// 	console.log('eval:', this.getJSON());
-		// }
-		// this.isPlaying = this.inboundsY(p);
 	}
 
 	move(){
 		if (this.selected){
-			// this.x = constrain(mouseX - this.selectionOffset[0], 0, width-this.w);
-			// this.y = constrain(mouseY - this.selectionOffset[1], 0, height-this.h);
-			// this.y = Math.max(0, mouseY - this.selectionOffset[1]);
-
 			this.time = Math.max(0, this.transport.pixelToMs(mouseY - this.selectionOffset[1]));
-
-			// if (snap){
-			// 	this.x = this.x 
-			// }
 		}
 	}
 
@@ -333,9 +307,7 @@ class Editor {
 	}
 
 	display(){
-		// this.editor.position(0, gridheight);
 		this.editor.position(gridWidth, 50);
-		// this.editor.size(width);
 		this.editor.size(width - gridWidth);
 		this.cm.setSize('100%', height);
 	}
