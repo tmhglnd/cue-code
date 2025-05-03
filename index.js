@@ -54,7 +54,7 @@ function mousePressed(){
 				};
 				read.readAsText(e.target.files[i]);
 			}
-			console.log(e.target.files);
+			// console.log(e.target.files);
 		}
 		input.click();
 	}
@@ -102,6 +102,10 @@ function keyPressed(){
 		transport.zoomOut();
 	}
 
+	else if (keyIsDown(CONTROL) && key === 's'){
+		exportSession();
+	}
+
 	// console.log(key);
 }
 
@@ -113,6 +117,30 @@ function wrap(a, lo, hi){
 	let r = hi - lo;
 	return ((((a - lo) % r) + r) % r) + lo;
 }
+
+function exportSession(){
+	let file = {
+		// name: 'empty',
+		// date: 'today',
+		// length: 10,
+		// zoom: 25,
+		// tempo: 100,
+		regions: []
+	};
+
+	regions.forEach((r) => {
+		file.regions.push({
+			id: r.id,
+			time: r.time,
+			code: r.code.getValue()
+		});
+	});
+
+	// console.log(JSON.stringify(file));
+}
+
+// function importSession(){
+// }
 
 class Transport {
 	constructor(){
@@ -193,16 +221,18 @@ class Transport {
 	}
 
 	pixelToMs(y){
-		return (y + this.focus) / 1000 * this.zoomlevel; 
+		return (y + this.focus) * this.zoomlevel; 
 	}
 
 	msToPixel(ms){
-		return ms / this.zoomlevel * 1000 - this.focus; 
+		return ms / this.zoomlevel - this.focus; 
 	}
 }
 
 class Region {
 	constructor(t=0, txt='', transport){
+		this.id = Math.floor(Math.random() * 10000);
+
 		this.x = 0;
 		this.y = 0;
 		this.time = t;
@@ -212,6 +242,7 @@ class Region {
 		this.selected = false;
 		this.selectionOffset = [ 0, 0 ];
 		this.isPlaying = false;
+		this._playhead = -1;
 
 		this.code = CodeMirror.Doc(txt, 'javascript');
 		this.transport = transport;
@@ -235,12 +266,17 @@ class Region {
 	}
 
 	play(playhead){
-		playhead = this.transport.msToPixel(playhead);
-		
-		if (this.inboundsY(playhead) !== this.isPlaying && !this.isPlaying){
+		if (this._playhead < this.time && playhead > this.time){
 			console.log('eval:', this.getJSON());
 		}
-		this.isPlaying = this.inboundsY(playhead);
+		this._playhead = playhead;
+
+		// let p = this.transport.msToPixel(playhead);
+		// // playhead = this.transport.msToPixel(playhead);		
+		// if (this.inboundsY(p) !== this.isPlaying && !this.isPlaying){
+		// 	console.log('eval:', this.getJSON());
+		// }
+		// this.isPlaying = this.inboundsY(p);
 	}
 
 	move(){
@@ -273,7 +309,7 @@ class Region {
 
 	getJSON(){
 		return {
-			time_ms: (this.x / 1000) * transport.zoomlevel,
+			time: this.time,
 			code: this.code.getValue()
 		}
 	}
