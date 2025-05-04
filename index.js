@@ -16,17 +16,22 @@ socket.on('connected', (id) => {
 
 let EDITOR_MODE = 'mercury';
 
-let gridheight = 250;
+let gridheight = 200;
 let gridWidth = 200;
 
 let regions = [];
 let transport;
 let editor;
 
+let loadBtn;
+let saveBtn;
+let addBtn;
+let fileBtn;
+
 // Ask if user is sure to close or refresh and loose all code
-window.onbeforeunload = function() {
-	return "The session may be lost if you refresh. Are you sure?";
-};
+// window.onbeforeunload = function() {
+// 	return "The session may be lost if you refresh. Are you sure?";
+// };
 
 // Initialize the P5 canvas for the timeline, timer and editor div
 function setup(){
@@ -37,6 +42,22 @@ function setup(){
 	transport = new Transport();
 	editor = new Editor();
 	editor.display();
+
+	addBtn = createButton('add region');
+	addBtn.position(gridWidth, 0);
+	addBtn.mousePressed(() => addRegion());
+
+	fileBtn = createButton('add file');
+	fileBtn.position(gridWidth + 100, 0);
+	fileBtn.mousePressed(addFiles);
+
+	saveBtn = createButton('save');
+	saveBtn.position(gridWidth + 200, 0);
+	saveBtn.mousePressed(downloadSession);
+
+	loadBtn = createButton('load');
+	loadBtn.position(gridWidth + 300, 0);
+	loadBtn.mousePressed(loadSession);
 }
 
 // Refresh and draw the timeline and regions 
@@ -66,34 +87,24 @@ function draw(){
 function mousePressed(){
 	// deselect all regions
 	regions.forEach(r => r.selected = false);
+	transport.selected = false;
 
 	// if mouse is clicked outside timeline ignore
 	if (mouseX < 0 || mouseX > gridWidth){ return; }
 
 	// Add one/multiple regions from a file with Shift + Click
 	if (keyIsDown(SHIFT)){
-		let input = document.createElement('input');
-		input.style.display = 'none';
-		input.type = 'file';
-		input.multiple = true;
-		input.onchange = (e) => {
-			for (let i = 0; i < e.target.files.length; i++){
-				let read = new FileReader();
-				read.onload = (f) => {
-					let pos = transport.pixelToMs(mouseY + i * 100);
-					regions.push(new Region(pos, f.target.result, transport));
-				};
-				read.readAsText(e.target.files[i]);
-			}
-		}
-		input.click();
+		addFiles();
 	}
 
 	// Add an empty region with Option + Click
 	else if (keyIsDown(OPTION)){
-		let pos = transport.pixelToMs(mouseY);
-		regions.push(new Region(pos, '', transport));
+		// let pos = transport.pixelToMs(mouseY);
+		// regions.push(new Region(pos, '', transport));
+		addRegion(mouseY);
 	}
+
+	else if (transport.selectPlayhead()){ return; }
 
 	// Select a region with the mouse to edit the code or move it by dragging
 	else {
@@ -109,7 +120,8 @@ function mousePressed(){
 function mouseDragged(){
 	// if the mouse is dragged and a region is selected, move it
 	regions.forEach(r => r.move());
-	// transport.movePlayHead();
+
+	transport.movePlayHead();
 }
 
 function mouseWheel(event){
@@ -169,6 +181,7 @@ function wrap(a, lo, hi){
 	return ((((a - lo) % r) + r) % r) + lo;
 }
 
+// convert the current session to JSON format
 function sessionToJSON(){
 	let file = {
 		zoom: transport.zoomlevel,
@@ -183,15 +196,17 @@ function sessionToJSON(){
 	return JSON.stringify(file, null, 2);
 }
 
+// transform JSON format to a new session
 function sessionFromJSON(json){
 	// remove all regions
 	regions = [];
-
+	// get all the info from the json
 	transport.zoomlevel = json.zoom;
 	transport.tempo = json.tempo;
+	// create new code regions with the info
 	json.regions.forEach((r) => {
 		regions.push(new Region(r.time, r.code, transport, r.id));
-	})
+	});
 }
 
 // get all the info from the transport and regions
@@ -223,6 +238,35 @@ function loadSession(){
 	input.click();
 }
 
+// add one or multiple files to the session
+function addFiles(){
+	let mousePos = mouseY;
+	let input = document.createElement('input');
+	input.style.display = 'none';
+	input.type = 'file';
+	input.multiple = true;
+	input.onchange = (e) => {
+		for (let i = 0; i < e.target.files.length; i++){
+			let read = new FileReader();
+			read.onload = (f) => {
+				// let pos = transport.pixelToMs(mousePos + i * 100);
+				// regions.push(new Region(pos, f.target.result, transport));
+				addRegion(mousePos + i * 100, f.target.result)
+			};
+			read.readAsText(e.target.files[i]);
+		}
+	}
+	input.click();
+}
+
+// add a region based on y pixel location with code
+// if no y is provided, randomly generate a position
+function addRegion(y, txt=''){
+	if (y === undefined){ y = random(height); }
+	console.log(y, txt);
+	regions.push(new Region(transport.pixelToMs(y), txt, transport));
+}
+
 // send the to be evaluated code over the web socket
 function evaluate(code){
 	socket.emit('eval', code);
@@ -238,6 +282,7 @@ class Transport {
 		this.running = false;
 		this.startTime = 0;
 		this.prevTime = 0;
+		this.selected = false;
 
 		this.tempo = 100;
 
@@ -273,11 +318,18 @@ class Transport {
 		line(0, this.position / this.zoomlevel - this.focus, gridWidth, this.position / this.zoomlevel - this.focus);
 	}
 
-	// movePlayHead(){
-	// 	if (mouseX > 0 && mouseX < gridWidth && mouseY < this.position + 2 && mouseY > this.position - 2){
-	// 		this.position = mouseY;
-	// 	}
-	// }
+	selectPlayhead(){
+		let y = this.msToPixel(this.position);
+		this.selected = mouseY > y - 10 && mouseY < y + 10;
+		return this.selected;
+	}
+
+	movePlayHead(){
+		if (this.selected){
+			this.position = Math.max(0, this.pixelToMs(mouseY));
+			regions.forEach(r => r._playhead = this.position);
+		}
+	}
 
 	zoomIn(){
 		this.zoomlevel = Math.max(1, this.zoomlevel - 1);
@@ -288,7 +340,7 @@ class Transport {
 	}
 
 	moveFocus(delta){
-		this.focus = Math.min(10000, Math.max(0, this.focus + delta * 0.5));
+		this.focus = Math.max(0, this.focus + delta * 0.5);
 	}
 
  	grid(){
@@ -338,7 +390,7 @@ class Region {
 		this.y = 0;
 		this.time = t;
 		this.w = gridWidth;
-		this.h = 50;
+		this.h = 25;
 
 		this.selected = false;
 		this.selectionOffset = [ 0, 0 ];
@@ -360,7 +412,7 @@ class Region {
 			// noStroke();
 			fill('grey');
 			if (this.selected){
-				strokeWeight(3);
+				strokeWeight(2);
 				stroke('white');
 				// fill('lightgrey');
 			}
@@ -440,7 +492,7 @@ class Editor {
 		
 		// initialize the codemirror editor with some settings
 		this.cm = CodeMirror(document.getElementById('editor'), {
-			theme: 'yonce',
+			theme: '3024-night',
 			mode: EDITOR_MODE,
 			value: '',
 			cursorHeight: 0.85,
@@ -462,7 +514,7 @@ class Editor {
 	display(){
 		this.editor.position(gridWidth, 50);
 		this.editor.size(width - gridWidth);
-		this.cm.setSize('100%', height);
+		this.cm.setSize('100%', height - 50);
 	}
 
 	setValue(t){
