@@ -18,9 +18,10 @@ function setup(){
 	createCanvas(windowWidth, windowHeight);
 	document.body.id = 'main';
 
-	// create an instance of the Transport and Editor
+	// create an instance of the Transport and Editor and display
 	transport = new Transport();
 	editor = new Editor();
+	editor.display();
 }
 
 // Refresh and draw the timeline and regions 
@@ -44,7 +45,6 @@ function draw(){
 	// draw everything else
 	transport.playhead();
 	transport.timestamp();
-	editor.display();
 }
 
 // Various actions for when clicking with the mouse in the timeline
@@ -136,6 +136,7 @@ function keyPressed(){
 // resize the canvas when the window is resized
 function windowResized(){
 	resizeCanvas(windowWidth, windowHeight);
+	editor.display();
 }
 
 // a wrapping utility funtion
@@ -361,10 +362,22 @@ class Editor {
 		
 		// initialize the codemirror editor with some settings
 		this.cm = CodeMirror(document.getElementById('editor'), {
-			lineNumbers: true,
 			theme: 'gruvbox-dark',
 			mode: 'javascript',
-			value: ''
+			value: '',
+			cursorHeight: 0.85,
+			cursorWidth: 1,
+			lineNumbers: true,
+			cursorHeight: 1,
+			indentUnit: 4,
+			indentWithTabs: false,
+			styleActiveLine: true,
+			matchBrackets: true,
+			// cursorScrollMargin: 20,
+			// mode: "mercury",
+			showCursorWhenSelecting: true,
+			// lineWrapping: true,
+			showHint: false
 		});
 	}
 
