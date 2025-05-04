@@ -332,11 +332,11 @@ class Transport {
 	}
 
 	zoomIn(){
-		this.zoomlevel = Math.max(1, this.zoomlevel - 1);
+		this.zoomlevel = Math.max(1, this.zoomlevel / 1.05);
 	}
 
 	zoomOut(){
-		this.zoomlevel++;
+		this.zoomlevel *= 1.05;
 	}
 
 	moveFocus(delta){
