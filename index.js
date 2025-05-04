@@ -1,3 +1,12 @@
+// 
+// cue-code
+// Sequentially evaluate code from a timeline
+//
+// written by Timo Hoogland (c) 2025
+// www.timohoogland.com
+// 
+// GNU GPL v3 LICENSE
+// 
 
 const socket = io();
 
@@ -21,7 +30,6 @@ window.onbeforeunload = function() {
 
 // Initialize the P5 canvas for the timeline, timer and editor div
 function setup(){
-	// frameRate(60);
 	createCanvas(windowWidth, windowHeight);
 	document.body.id = 'main';
 
@@ -127,7 +135,7 @@ function keyPressed(){
 
 	// use W to return to the beginning
 	else if (key === 'w'){
-		transport.position = 0;
+		transport.reset();
 	}
 	// use CTRL + to zoom in on the timeline
 	else if (keyIsDown(CONTROL) && key === '='){
@@ -140,6 +148,10 @@ function keyPressed(){
 	// use S to export the session as a JSON file
 	else if (keyIsDown(CONTROL) && key === 's'){
 		downloadSession();
+	}
+	// use O to import a session from a JSON file
+	else if (keyIsDown(CONTROL) && key === 'o'){
+		loadSession();
 	}
 
 	// console.log(key);
@@ -160,7 +172,7 @@ function wrap(a, lo, hi){
 function sessionToJSON(){
 	let file = {
 		zoom: transport.zoomlevel,
-		// tempo: 100,
+		tempo: 100,
 		regions: []
 	};
 
@@ -183,8 +195,18 @@ function downloadSession(){
 
 // import a session from a json file into the editor
 // clear the current session, removing all current regions
-function importSession(){
-	return;
+function loadSession(){
+	let input = document.createElement('input');
+	input.style.display = 'none';
+	input.type = 'file';
+	input.accept = '.json';
+	// input.multiple = true;
+	input.onchange = (e) => {
+		if (e.target.files.length > 0){
+			console.log(e.target.files[0]);
+		}
+	}
+	input.click();
 }
 
 // send the to be evaluated code over the web socket
@@ -215,6 +237,11 @@ class Transport {
 	stop(){
 		this.running = false;
 		// socket.emit('silence', true);
+	}
+
+	reset(){
+		transport.position = 0;
+		regions.forEach((r) => r._playhead = -1);
 	}
 
 	progress(){
@@ -288,15 +315,15 @@ class Transport {
 // The region can be moved by click/dragging it over the timeline
 // It is also connected to the global transport so it knows when to play
 class Region {
-	constructor(t=0, txt='', transport){
-		this.id = Math.floor(Math.random() * 10000);
+	constructor(t=0, txt='', transport, id){
+		this.id = id ? id : Math.floor(Math.random() * 10000);
 
 		this.x = 0;
 		this.y = 0;
 		this.time = t;
 		this.w = gridWidth;
 		this.h = 50;
-		// this.h = gridheight;
+
 		this.selected = false;
 		this.selectionOffset = [ 0, 0 ];
 		this.isPlaying = false;
