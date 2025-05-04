@@ -26,14 +26,15 @@ const subtitle = `
 const { program } = require('commander');
 
 const options = program
-.name('node server.js')
-.usage('[option] argument')
-.description('Sequentially evaluate code from a timeline')
-.option('-p, --port <number>', 'the port to receive your code on', '4880')
-.option('-a, --address <string>', 'the address to receive your code on', '/mercury-code')
-.option('-s, --serverport <number>', 'the port the server listens on', '8001')
-.parse(process.argv)
-.opts();
+	.name('node server.js')
+	.usage('[option] argument')
+	.description('Sequentially evaluate code from a timeline')
+	.option('-p, --port <number>', 'the port to receive your code on', '4880')
+	.option('-a, --address <string>', 'the address to receive your code on', '/mercury-code')
+	.option('-s, --serverport <number>', 'the port the server listens on', '8001')
+	.option('-m, --mute <string>', 'the mute message to silence your sound with', 'silence')
+	.parse(process.argv)
+	.opts();
 
 const express = require('express');
 const { createServer } = require('node:http');
@@ -65,8 +66,13 @@ io.on('connection', (socket) => {
 	console.log('Code will be send to:', options.address, 'at port:', options.port);
 
 	socket.on('eval', (msg) => {
-		console.log('Received:', msg);
+		console.log('Eval:', `${[msg]}`);
 		client.send(options.address, msg);
+	});
+
+	socket.on('silence', (msg) => {
+		console.log('Silenced');
+		client.send(options.address, options.mute);
 	});
 
 	socket.on('disconnect', () => {
