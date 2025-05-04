@@ -5,6 +5,8 @@ socket.on('connected', (id) => {
 	console.log(`Connected to server with id: ${id}`);
 });
 
+let EDITOR_MODE = 'mercury';
+
 let gridheight = 250;
 let gridWidth = 200;
 
@@ -49,6 +51,12 @@ function draw(){
 
 // Various actions for when clicking with the mouse in the timeline
 function mousePressed(){
+	// deselect all regions
+	regions.forEach(r => r.selected = false);
+	
+	// if mouse is clicked outside timeline ignore
+	if (mouseX < 0 || mouseX > gridWidth){ return; }
+
 	// Add one/multiple regions from a file with Shift + Click
 	if (keyIsDown(SHIFT)){
 		let input = document.createElement('input');
@@ -76,7 +84,6 @@ function mousePressed(){
 
 	// Select a region with the mouse to edit the code or move it by dragging
 	else {
-		regions.forEach(r => r.selected = false);
 		for (let r = regions.length-1; r >= 0; r--){
 			if (regions[r].select()) {
 				editor.swapDoc(regions[r].code);
@@ -284,7 +291,7 @@ class Region {
 		this.isPlaying = false;
 		this._playhead = -1;
 
-		this.code = CodeMirror.Doc(txt, 'javascript');
+		this.code = CodeMirror.Doc(txt, EDITOR_MODE);
 		this.transport = transport;
 	}
 
@@ -377,7 +384,7 @@ class Editor {
 		// initialize the codemirror editor with some settings
 		this.cm = CodeMirror(document.getElementById('editor'), {
 			theme: 'yonce',
-			mode: 'mercury',
+			mode: EDITOR_MODE,
 			value: '',
 			cursorHeight: 0.85,
 			cursorWidth: 1,
@@ -387,10 +394,9 @@ class Editor {
 			indentWithTabs: false,
 			styleActiveLine: true,
 			matchBrackets: true,
+			lineWrapping: true,
 			// cursorScrollMargin: 20,
-			// mode: "mercury",
 			showCursorWhenSelecting: true,
-			// lineWrapping: true,
 			showHint: false,
 			extraKeys: extraKeys
 		});
