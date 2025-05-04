@@ -16,8 +16,8 @@ install dependencies
 
 start a local server
 
-`http-server`
+`node server.js`
 
 go to the browser at
 
-`localhost:8080`
+`localhost:8001`

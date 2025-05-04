@@ -11,6 +11,11 @@
   "description": "",
   "dependencies": {
     "codemirror": "^5.65.19",
-    "p5": "^2.0.1"
+    "commander": "^13.1.0",
+    "express": "^4.21.2",
+    "node-osc": "^9.1.4",
+    "p5": "^2.0.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   }
 }

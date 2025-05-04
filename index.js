@@ -1,4 +1,10 @@
 
+const socket = io();
+
+socket.on('connected', (id) => {
+	console.log(`Connected to server with id: ${id}`);
+});
+
 let gridheight = 250;
 let gridWidth = 200;
 
@@ -53,11 +59,18 @@ function mousePressed(){
 		input.click();
 	}
 
-	regions.forEach(r => r.selected = false);
-	for (let r=regions.length-1; r>=0; r--){
-		if (regions[r].select()) {
-			editor.swapDoc(regions[r].code);
-			return;
+	else if (keyIsDown(OPTION)){
+		let pos = transport.pixelToMs(mouseY);
+		regions.push(new Region(pos, '', transport));
+	}
+
+	else {
+		regions.forEach(r => r.selected = false);
+		for (let r=regions.length-1; r>=0; r--){
+			if (regions[r].select()) {
+				editor.swapDoc(regions[r].code);
+				return;
+			}
 		}
 	}
 }
@@ -259,6 +272,7 @@ class Region {
 		if (this._playhead < this.time && playhead > this.time){
 			this.isPlaying = 1;
 			console.log('eval:', this.getJSON());
+			socket.emit('eval', this.code.getValue());
 		}
 		this._playhead = playhead;
 	}
