@@ -172,7 +172,7 @@ function wrap(a, lo, hi){
 function sessionToJSON(){
 	let file = {
 		zoom: transport.zoomlevel,
-		tempo: 100,
+		tempo: transport.tempo,
 		regions: []
 	};
 
@@ -181,6 +181,17 @@ function sessionToJSON(){
 	});
 
 	return JSON.stringify(file, null, 2);
+}
+
+function sessionFromJSON(json){
+	// remove all regions
+	regions = [];
+
+	transport.zoomlevel = json.zoom;
+	transport.tempo = json.tempo;
+	json.regions.forEach((r) => {
+		regions.push(new Region(r.time, r.code, transport, r.id));
+	})
 }
 
 // get all the info from the transport and regions
@@ -200,10 +211,13 @@ function loadSession(){
 	input.style.display = 'none';
 	input.type = 'file';
 	input.accept = '.json';
-	// input.multiple = true;
 	input.onchange = (e) => {
 		if (e.target.files.length > 0){
-			console.log(e.target.files[0]);
+			let read = new FileReader();
+			read.onload = (f) => {
+				sessionFromJSON(JSON.parse(f.target.result));
+			};
+			read.readAsText(e.target.files[0]);
 		}
 	}
 	input.click();
@@ -224,6 +238,8 @@ class Transport {
 		this.running = false;
 		this.startTime = 0;
 		this.prevTime = 0;
+
+		this.tempo = 100;
 
 		this.zoomlevel = 25;
 		this.focus = 0;
@@ -394,6 +410,7 @@ class Region {
 
 	getJSON(){
 		return {
+			id: this.id,
 			time: this.time,
 			code: this.code.getValue()
 		}
