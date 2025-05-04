@@ -169,6 +169,11 @@ function importSession(){
 	return;
 }
 
+// send the to be evaluated code over the web socket
+function evaluate(code){
+	socket.emit('eval', code);
+}
+
 // the global transport is a infinte scrollable timeline with a playhead
 // it can be started/paused, zoomed in/out, scrolled through
 // it displays the current time in min:sec.ms
@@ -313,7 +318,7 @@ class Region {
 		// then moved over the time or equal to the time, trigger the play
 		if (this._playhead < this.time && playhead >= this.time){
 			this.isPlaying = 1;
-			socket.emit('eval', this.code.getValue());
+			evaluate(this.code.getValue());
 			editor.swapDoc(this.code);
 			console.log('eval:', this.getJSON());
 		}
@@ -359,11 +364,20 @@ class Editor {
 		this.editor.style('color', 'white');
 		this.editor.style('z-index', 1000);
 		this.editor.id('editor');
+
+		let extraKeys = {
+			'Alt-/': 'toggleComment',
+			'Ctrl-/': 'toggleComment',
+			'Shift-Alt-7': 'toggleComment',
+			'Shift-Ctrl-7': 'toggleComment',
+			'Alt-Enter': () => { evaluate(this.cm.getValue()) },
+			'Ctrl-Enter': () => { evaluate(this.cm.getValue()) }
+		}
 		
 		// initialize the codemirror editor with some settings
 		this.cm = CodeMirror(document.getElementById('editor'), {
-			theme: 'gruvbox-dark',
-			mode: 'javascript',
+			theme: 'yonce',
+			mode: 'mercury',
 			value: '',
 			cursorHeight: 0.85,
 			cursorWidth: 1,
@@ -377,7 +391,8 @@ class Editor {
 			// mode: "mercury",
 			showCursorWhenSelecting: true,
 			// lineWrapping: true,
-			showHint: false
+			showHint: false,
+			extraKeys: extraKeys
 		});
 	}
 
