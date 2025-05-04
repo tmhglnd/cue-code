@@ -14,6 +14,11 @@ let regions = [];
 let transport;
 let editor;
 
+// Ask if user is sure to close or refresh and loose all code
+window.onbeforeunload = function() {
+	return "The session may be lost if you refresh. Are you sure?";
+};
+
 // Initialize the P5 canvas for the timeline, timer and editor div
 function setup(){
 	// frameRate(60);
@@ -53,7 +58,7 @@ function draw(){
 function mousePressed(){
 	// deselect all regions
 	regions.forEach(r => r.selected = false);
-	
+
 	// if mouse is clicked outside timeline ignore
 	if (mouseX < 0 || mouseX > gridWidth){ return; }
 
@@ -134,7 +139,7 @@ function keyPressed(){
 	}
 	// use S to export the session as a JSON file
 	else if (keyIsDown(CONTROL) && key === 's'){
-		exportSession();
+		downloadSession();
 	}
 
 	// console.log(key);
@@ -152,9 +157,7 @@ function wrap(a, lo, hi){
 	return ((((a - lo) % r) + r) % r) + lo;
 }
 
-// get all the info from the transport and regions
-// export all the info as a JSON file and store to downloads
-function exportSession(){
+function sessionToJSON(){
 	let file = {
 		zoom: transport.zoomlevel,
 		// tempo: 100,
@@ -165,9 +168,17 @@ function exportSession(){
 		file.regions.push(r.getJSON());
 	});
 
-	console.log(file);
+	return JSON.stringify(file, null, 2);
+}
 
-	// new File([this.cm.getValue()], `${f}.txt`, { type: 'text/plain;charset=utf-8' })
+// get all the info from the transport and regions
+// export all the info as a JSON file and store to downloads
+function downloadSession(){
+	let a = document.createElement("a");
+	let b = new Blob([ sessionToJSON() ], {type: 'text/plain'})
+	a.href = URL.createObjectURL(b);
+	a.download = `cue-code-session_${date()}.json`;
+	a.click();
 }
 
 // import a session from a json file into the editor
@@ -378,7 +389,9 @@ class Editor {
 			'Shift-Alt-7': 'toggleComment',
 			'Shift-Ctrl-7': 'toggleComment',
 			'Alt-Enter': () => { evaluate(this.cm.getValue()) },
-			'Ctrl-Enter': () => { evaluate(this.cm.getValue()) }
+			'Ctrl-Enter': () => { evaluate(this.cm.getValue()) },
+			'Ctrl-S' : () => { downloadSession() },
+			'Alt-S' : () => { downloadSession() },
 		}
 		
 		// initialize the codemirror editor with some settings
@@ -421,4 +434,16 @@ class Editor {
 		// based on the selected region
 		this.cm.swapDoc(doc);
 	}
+}
+
+// return the date and time formatted as a string
+function date(){
+	let now = new Date();
+	let dd = String(now.getDate()).padStart(2, '0');
+	let mm = String(now.getMonth() + 1).padStart(2, '0');
+	let yyyy = now.getFullYear();
+	let hh = String(now.getHours()).padStart(2, '0');
+	let mi = String(now.getMinutes()).padStart(2, '0');
+	let ss = String(now.getSeconds()).padStart(2, '0');
+	return `${yyyy}-${mm}-${dd}_${hh}.${mi}.${ss}`;
 }

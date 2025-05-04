@@ -13,7 +13,6 @@
     "codemirror": "^5.65.19",
     "commander": "^13.1.0",
     "express": "^4.21.2",
-    "file-saver": "^2.0.5",
     "node-osc": "^9.1.4",
     "p5": "^2.0.1",
     "socket.io": "^4.8.1",
