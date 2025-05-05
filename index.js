@@ -375,21 +375,26 @@ class Transport {
 			// 	stroke('white');
 			// }
 			line(0, p, gridWidth, p);
+			if (l % 1 === 0){
+				noStroke();
+				fill('grey');
+				textAlign(RIGHT, TOP);
+				textSize(12);
+				text(this.msToTimestamp(this.pixelToMs(p + 0.001)), gridWidth, p+2);
+			}
 		}
 	}
 
 	timestamp(){
-		noStroke();
+		// noStroke();
+		stroke('white');
+		strokeWeight(2);
 		fill('white');
 		textFont('courier new');
 		
 		textAlign(LEFT, BOTTOM);
 		textSize(32);
-
-		let ms = (Math.floor(this.position % 1000)).toString().padStart(3, 0);
-		let sec = (Math.floor((this.position / 1000) % 60)).toString().padStart(2, 0);
-		let min = (Math.floor(this.position / 60000)).toString().padStart(2, 0);
-		text(`${min}:${sec}.${ms}`, gridWidth + 10, height - 10);
+		text(this.msToTimestamp(this.position), gridWidth + 10, height - 10);
 	}
 
 	pixelToMs(y){
@@ -398,6 +403,13 @@ class Transport {
 
 	msToPixel(ms){
 		return ms / this.zoomlevel - this.focus; 
+	}
+
+	msToTimestamp(millisec){
+		let ms = (Math.floor(millisec % 1000)).toString().padStart(3, 0);
+		let sec = (Math.floor(millisec / 1000) % 60).toString().padStart(2, 0);
+		let min = (Math.floor(millisec / 60000)).toString().padStart(2, 0);
+		return `${min}:${sec}.${ms}`;
 	}
 }
 
