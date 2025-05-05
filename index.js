@@ -332,7 +332,7 @@ class Transport {
 	}
 
 	zoomIn(){
-		this.zoomlevel = Math.max(1, this.zoomlevel / 1.05);
+		this.zoomlevel = Math.max(2, this.zoomlevel / 1.05);
 	}
 
 	zoomOut(){
@@ -344,13 +344,36 @@ class Transport {
 	}
 
  	grid(){
-		let stepsize = 1000 / this.zoomlevel;
+		// let stepsize = 1000 / this.zoomlevel;
+		let stepsize = 1000;
+		let highlight = 4;
+		// console.log(this.zoomlevel);
+		if (this.zoomlevel < 5){
+			stepsize = 250 / this.zoomlevel;
+		} else if (this.zoomlevel < 50){
+			highlight = 5;
+			stepsize = 1000 / this.zoomlevel;
+		} else if (this.zoomlevel < 500){
+			highlight = 6;
+			stepsize = 10000 / this.zoomlevel;
+		} else if (this.zoomlevel < 5000){
+			highlight = 10;
+			stepsize = 60000 / this.zoomlevel;
+		} else {
+			highlight = 60;
+			stepsize = 600000 / this.zoomlevel;
+		} 
+
 		let numlines = Math.ceil(height / stepsize);
 
 		for (let l = 0; l < numlines; l++){
 			let p = wrap(l * stepsize - this.focus, 0, numlines * stepsize);
 			strokeWeight(1);
 			stroke('darkgrey');
+			// if (p % highlight * stepsize === 0){
+			// 	strokeWeight(2);
+			// 	stroke('white');
+			// }
 			line(0, p, gridWidth, p);
 		}
 	}
@@ -360,13 +383,13 @@ class Transport {
 		fill('white');
 		textFont('courier new');
 		
-		textAlign(RIGHT, TOP);
+		textAlign(LEFT, BOTTOM);
 		textSize(32);
 
 		let ms = (Math.floor(this.position % 1000)).toString().padStart(3, 0);
 		let sec = (Math.floor((this.position / 1000) % 60)).toString().padStart(2, 0);
 		let min = (Math.floor(this.position / 60000)).toString().padStart(2, 0);
-		text(`${min}:${sec}.${ms}`, width - 10, 10);
+		text(`${min}:${sec}.${ms}`, gridWidth + 10, height - 10);
 	}
 
 	pixelToMs(y){
@@ -514,7 +537,7 @@ class Editor {
 	display(){
 		this.editor.position(gridWidth, 50);
 		this.editor.size(width - gridWidth);
-		this.cm.setSize('100%', height - 50);
+		this.cm.setSize('100%', height - 100);
 	}
 
 	setValue(t){
