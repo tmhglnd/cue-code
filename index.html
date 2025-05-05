@@ -21,17 +21,23 @@
 	<link href="./node_modules/codemirror/lib/codemirror.css" rel="stylesheet">
 
 	<link href="./node_modules/codemirror/theme/gruvbox-dark.css" rel="stylesheet">
-	<link href="./node_modules/codemirror/theme/lesser-dark.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/material-darker.css" rel="stylesheet">
-	<link href="./node_modules/codemirror/theme/liquibyte.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/3024-night.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/abbott.css" rel="stylesheet">
-	<link href="./node_modules/codemirror/theme/ambiance.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/ayu-dark.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/ayu-mirage.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/base16-dark.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/bespin.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/blackboard.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/cobalt.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/material-ocean.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/monokai.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/moxer.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/panda-syntax.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/rubyblue.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/shadowfox.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/the-matrix.css" rel="stylesheet">
+	<link href="./node_modules/codemirror/theme/tomorrow-night-eighties.css" rel="stylesheet">
 	<link href="./node_modules/codemirror/theme/yonce.css" rel="stylesheet">
 	
 	<!-- <script src="./node_modules/codemirror/mode/javascript/javascript.js"></script> -->
@@ -49,7 +55,8 @@
 		}
 
 		button {
-			/* z-index: 1000;  */
+			background: rgba(255, 255, 255, 0.2);
+			color: white;
 			position: relative;
 			border-width: 0px;
 			width: 90px;
@@ -57,8 +64,26 @@
 			margin: 12px;
 		}
 
+		button:hover {
+			background: rgba(255, 255, 255, 0.4);
+		}
+
 		button:active {
 			background: gray;
+		}
+
+		select {
+			background: rgba(255, 255, 255, 0.2);
+			color: white;
+			position: relative;
+			border-width: 0px;
+			width: 90px;
+			height: 25px;
+			margin: 12px;
+		}
+
+		select:hover {
+			background: rgba(255, 255, 255, 0.4);
 		}
 
 		.CodeMirror {

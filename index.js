@@ -28,6 +28,14 @@ let saveBtn;
 let addBtn;
 let fileBtn;
 
+let colors = {
+	background: 'black',
+	accent: [255, 255, 255],
+	contrast: 'red',
+	primairy: 'darkgrey',
+	secundairy: 'grey'
+}
+
 // Ask if user is sure to close or refresh and loose all code
 // window.onbeforeunload = function() {
 // 	return "The session may be lost if you refresh. Are you sure?";
@@ -64,7 +72,8 @@ function setup(){
 // Draw the playhead and progress it in time based on milliseconds
 // Trigger a region if the playhead passes it
 function draw(){
-	background('black');
+	background(colors.background);
+	// background(editor.getStyle()['background-color']);
 	
 	// draw the grid and progress the playhead when playing
 	transport.grid();
@@ -314,7 +323,7 @@ class Transport {
 
 	playhead(){
 		strokeWeight(5);
-		stroke('red');
+		stroke(colors.contrast);
 		line(0, this.position / this.zoomlevel - this.focus, gridWidth, this.position / this.zoomlevel - this.focus);
 	}
 
@@ -344,23 +353,23 @@ class Transport {
 	}
 
  	grid(){
-		// let stepsize = 1000 / this.zoomlevel;
 		let stepsize = 1000;
-		let highlight = 4;
-		// console.log(this.zoomlevel);
+		// let highlight = 0;
+		// console.log(Math.log(this.zoomlevel/5)/Math.log(5));
+
 		if (this.zoomlevel < 5){
 			stepsize = 250 / this.zoomlevel;
 		} else if (this.zoomlevel < 50){
-			highlight = 5;
+			// highlight = 5;
 			stepsize = 1000 / this.zoomlevel;
 		} else if (this.zoomlevel < 500){
-			highlight = 6;
+			// highlight = 6;
 			stepsize = 10000 / this.zoomlevel;
 		} else if (this.zoomlevel < 5000){
-			highlight = 10;
+			// highlight = 10;
 			stepsize = 60000 / this.zoomlevel;
 		} else {
-			highlight = 60;
+			// highlight = 60;
 			stepsize = 600000 / this.zoomlevel;
 		} 
 
@@ -369,27 +378,22 @@ class Transport {
 		for (let l = 0; l < numlines; l++){
 			let p = wrap(l * stepsize - this.focus, 0, numlines * stepsize);
 			strokeWeight(1);
-			stroke('darkgrey');
-			// if (p % highlight * stepsize === 0){
-			// 	strokeWeight(2);
-			// 	stroke('white');
-			// }
+			stroke(colors.primairy);
 			line(0, p, gridWidth, p);
-			if (l % 1 === 0){
-				noStroke();
-				fill('grey');
-				textAlign(RIGHT, TOP);
-				textSize(12);
-				text(this.msToTimestamp(this.pixelToMs(p + 0.001)), gridWidth, p+2);
-			}
+
+			noStroke();
+			fill(colors.secundairy);
+			textAlign(RIGHT, TOP);
+			textSize(14);
+			text(this.msToTimestamp(this.pixelToMs(p + 0.00001)), gridWidth, p+2);
 		}
 	}
 
 	timestamp(){
 		// noStroke();
-		stroke('white');
+		stroke(colors.accent);
 		strokeWeight(2);
-		fill('white');
+		fill(colors.accent);
 		textFont('courier new');
 		
 		textAlign(LEFT, BOTTOM);
@@ -443,18 +447,17 @@ class Region {
 		// only draw the region and flash if within the limits of the screen
 		if (this.y + this.h >= 0 && this.y < height){
 			stroke('black');
-			strokeWeight(1);
-			// noStroke();
-			fill('grey');
+			strokeWeight(2);
+			fill(255, 255, 255, 100);
 			if (this.selected){
 				strokeWeight(2);
-				stroke('white');
-				// fill('lightgrey');
+				stroke(colors.accent);
 			}
 			rect(this.x, this.y, this.w, this.h);
 			// display a flashing white image when the region is triggered
 			if (this.isPlaying > 0){
 				fill(255, 255, 255, this.isPlaying * 255);
+				// fill(colors.accent);
 				rect(this.x, this.y, this.w, this.h);
 				this.isPlaying -= 0.02;
 			}
@@ -510,7 +513,7 @@ class Region {
 class Editor {
 	constructor(){
 		this.editor = createElement('div');
-		this.editor.style('color', 'white');
+		this.editor.style('color', colors.accent);
 		this.editor.style('z-index', 1000);
 		this.editor.id('editor');
 
@@ -527,7 +530,7 @@ class Editor {
 		
 		// initialize the codemirror editor with some settings
 		this.cm = CodeMirror(document.getElementById('editor'), {
-			theme: '3024-night',
+			theme: 'material-darker',
 			mode: EDITOR_MODE,
 			value: '',
 			cursorHeight: 0.85,
@@ -544,6 +547,30 @@ class Editor {
 			showHint: false,
 			extraKeys: extraKeys
 		});
+
+		this.themes = [ 'gruvbox-dark', 'material-darker', '3024-night', 'abbott', 'ayu-dark', 'ayu-mirage', 'base16-dark', 'bespin', 'blackboard', 'cobalt', 'material-ocean', 'monokai', 'moxer', 'panda-syntax', 'rubyblue', 'shadowfox', 'the-matrix', 'tomorrow-night-eighties', 'yonce' ].sort();
+
+		this.themeMenu = createSelect();
+		for (var i = 0; i < this.themes.length; i++){
+			this.themeMenu.option(this.themes[i]);
+		}
+		this.themeMenu.position(gridWidth + 400, 0);
+		this.themeMenu.selected('material-darker');
+		this.themeMenu.elt.onchange = () => this.setTheme();
+	}
+
+	setTheme(){
+		this.cm.setOption('theme', this.themeMenu.value());
+		let s = this.getStyle();
+
+		colors.background = s['background-color'];
+		colors.accent = s['color'];
+	}
+
+	getStyle(){
+		let e = document.querySelector('.CodeMirror');
+		let style = getComputedStyle(e);
+		return style;
 	}
 
 	display(){
