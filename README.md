@@ -42,25 +42,44 @@ npm install
 
 ## 🕹 Usage
 
-The interface consists of 4 areas: a timeline, a menubar, a code-editor and a clock display. Some shortkeys depend on the area you are focused on. You can focus on an area by clicking it with the mouse.
+### Connect to Interpreter
 
-### Timeline
+This project does not include any interpreter and audio/visual engine. Therefore the code needs to be evaluated elsewhere. This is done by sending the code from the region to the server via a web-socket. From there the server forwards the code as an OSC-message to your desired port.
+
+#### Setup osc-address and port
+
+By default, when starting the server with `node server.js` the default port the server will listen at is: `8001`. The default port the server will send the code to is: `4880` and the osc-address is `/mercury-code`. These settings can be adjusted by using the following flags in the terminal command:
+
+```
+-p, --port <number>        the port to receive your code on (default: "4880")
+-a, --address <string>     the address to receive your code on (default: "/mercury-code")
+-s, --serverport <number>  the port the server listens on (default: "8001")
+-m, --mute <string>        the mute message to silence your sound with (default: "silence")
+-h, --help                 display help for command
+```
+
+### Interface
+
+The interface consists of **4 areas**: a **timeline**, a **menubar**, a **code-editor** and a **clock-display**. Note: Some shortkeys depend on the area you are focused on. You can focus on an area by clicking it with the mouse.
+
+#### Timeline
 
 The timeline displays all the code-regions in your project.
 
-- Add an empty region: `option/alt``click` or click: *add region*
-- Add a region from file: `shift``click` or click: *add file* (multiple selection possible)
+- Add an empty region: `option/alt` `click` or click: *add region*
+- Add a region from file: `shift` `click` or click: *add file* (multiple selection possible)
 - Move a region: `click` the region to select it, then `drag` up or down
-- Zoom the timeline: `ctrl``+` to zoom in, `ctrl``-` to zoom out
+- Remove a region: `click` the region to select it, then press `backspace/delete`
+- Zoom the timeline: `ctrl` `+` to zoom in, `ctrl` `-` to zoom out
 - Scroll the timeline: `scroll` with the mousewheel or 2 fingers
 - Start/Pause playback: `space`
 - Reset playback to start: `enter`
 
-### Clock
+#### Clock
 
-The clock on the bottom of the screen displays the time the playhead is located at in `minutes`:`seconds`.`milliseconds`.
+The clock on the bottom of the screen displays the time the playhead is located at in `minutes:seconds.milliseconds`.
 
-### Menubar
+#### Menubar
 
 - *add region* - add an empty region in the timeline
 - *add file* - add a region with code from a file (multiple selection possible)
@@ -68,7 +87,9 @@ The clock on the bottom of the screen displays the time the playhead is located 
 - *load* - import a session from a `.json` format
 - *theme* - select a theme for the editor from the drop-down menu
 
-### Editor
+#### Editor
+
+- Evaluate code directly: `Ctrl/Alt` `Enter`
 
 The editor allows you to type code that is connected to a specific region in the timeline. First select the region you want to edit, then start typing code. When selecting another region the documents are automatically swapped.
 
@@ -76,8 +97,10 @@ The syntax highlighting is by default `mercury`, although this highlighting also
 
 ## 🔋 Powered By
 
-- Mercury was granted funding from [**Creative Industries Fund NL**](https://stimuleringsfonds.nl/en/)
-- Mercury was granted in-kind funding from [**Creative Coding Utrecht**](https://creativecodingutrecht.nl/)
+This project was developed as part of the [Mercury](https://www.timohoogland.com/mercury-livecoding/) and [Drumcode](https://www.timohoogland.com/drum-code/) projects.
+
+- These projects were funded by [**Creative Industries Fund NL**](https://stimuleringsfonds.nl/en/)
+- These projects were supported by [**Creative Coding Utrecht**](https://creativecodingutrecht.nl/)
 
 ## 📄 License
 
