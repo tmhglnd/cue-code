@@ -19,6 +19,8 @@ This tool was mainly created for my personal use while making compositions with 
 [![](https://img.shields.io/static/v1?label=Support%20on%20Ko-Fi&message=%E2%9D%A4&logo=Kofi)](https://ko-fi.com/I2I3SV7FX)
 [![](https://img.shields.io/static/v1?label=Support%20on%20Patreon&message=%E2%9D%A4&logo=Patreon)](https://www.patreon.com/bePatron?u=9649817)
 
+![](./media/screenshot.png)
+
 ## 🚀 Install
 
 1. download the repository
