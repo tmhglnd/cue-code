@@ -24,7 +24,7 @@ let EDITOR_MODE = 'mercury';
 let EDITOR_THEME = 'yonce';
 
 let gridheight = 200;
-let gridWidth = 200;
+let gridWidth = 150;
 
 let regions = [];
 let transport;
@@ -132,6 +132,8 @@ function mousePressed(){
 			}
 		}
 	}
+
+	transport.setPlayHead();
 }
 
 function mouseDragged(){
@@ -168,10 +170,12 @@ function keyPressed(){
 	}
 	// use CTRL + to zoom in on the timeline
 	else if (keyIsDown(CONTROL) && key === '='){
+		// transport.focusTo(mouseY);
 		transport.zoomIn();
 	}
 	// use CTRL - to zoom out on the timeline
 	else if (keyIsDown(CONTROL) && key === '-'){
+		// transport.focusTo(mouseY);
 		transport.zoomOut();
 	}
 	// use S to export the session as a JSON file
@@ -317,6 +321,7 @@ class Transport {
 
 	stop(){
 		this.running = false;
+		socket.emit('eval', '');
 		// socket.emit('silence', true);
 	}
 
@@ -336,6 +341,7 @@ class Transport {
 		strokeWeight(5);
 		stroke(colors.contrast);
 		line(0, this.position / this.zoomlevel - this.focus, gridWidth, this.position / this.zoomlevel - this.focus);
+		// line(0, (this.position - this.focus) / this.zoomlevel, gridWidth, (this.position - this.focus) / this.zoomlevel);
 	}
 
 	selectPlayhead(){
@@ -345,10 +351,12 @@ class Transport {
 	}
 
 	movePlayHead(){
-		if (this.selected){
-			this.position = Math.max(0, this.pixelToMs(mouseY));
-			regions.forEach(r => r._playhead = this.position);
-		}
+		if (this.selected){ this.setPlayHead() }
+	}
+
+	setPlayHead(){
+		this.position = Math.max(0, this.pixelToMs(mouseY));
+		regions.forEach(r => r._playhead = this.position);
 	}
 
 	zoomIn(){
@@ -361,6 +369,11 @@ class Transport {
 
 	moveFocus(delta){
 		this.focus = Math.max(0, this.focus + delta * 0.5);
+	}
+
+	focusTo(y){
+		// this.focus = this.pixelToMs(y) / this.zoomlevel;
+		// this.focus = (y + this.focus) / this.zoomlevel;
 	}
 
  	grid(){
@@ -560,8 +573,10 @@ class Editor {
 			extraKeys: extraKeys
 		});
 
-		this.themes = [ 'gruvbox-dark', 'material-darker', '3024-night', 'abbott', 'ayu-dark', 'ayu-mirage', 'base16-dark', 'bespin', 'blackboard', 'cobalt', 'material-ocean', 'monokai', 'moxer', 'panda-syntax', 'rubyblue', 'shadowfox', 'the-matrix', 'tomorrow-night-eighties', 'yonce' ].sort();
+		// various themes, also included via index.html
+		this.themes = [ 'gruvbox-dark', 'material-darker', '3024-night', 'abbott', 'ayu-dark', 'ayu-mirage', 'base16-dark', 'bespin', 'blackboard', 'cobalt', 'material-ocean', 'monokai', 'moxer', 'panda-syntax', 'rubyblue', 'shadowfox', 'the-matrix', 'tomorrow-night-bright', 'yonce' ].sort();
 
+		// the theme selection menu
 		this.themeMenu = createSelect();
 		this.themeMenu.position(gridWidth + 400, 0);
 		for (var i = 0; i < this.themes.length; i++){
@@ -571,6 +586,7 @@ class Editor {
 		this.setTheme(this.theme);
 	}
 
+	// adjust the theme through selection, or set based on the argument
 	setTheme(t){
 		this.theme = t;
 		if (!this.theme){
@@ -584,6 +600,7 @@ class Editor {
 		colors.accent = s['color'];
 	}
 
+	// return the style of the .CodeMirror selected theme for background/color
 	getStyle(){
 		let e = document.querySelector('.CodeMirror');
 		let style = getComputedStyle(e);
