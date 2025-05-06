@@ -3,15 +3,17 @@
 ░▒█░░░░▒█░▒█░▒█▀▀▀░▀▀░▒█░░░░▒█░░▒█░▒█░▒█░▒█▀▀▀
 ░▒█▄▄▀░░▀▄▄▀░▒█▄▄▄░░░░▒█▄▄▀░▒█▄▄▄█░▒█▄▄█░▒█▄▄▄
 
-	░██▄░▀▄▀░░░▀█▀░█▄▒▄█░█▄█░▄▀▒░█▒░░█▄░█░█▀▄
-	▒█▄█░▒█▒▒░░▒█▒░█▒▀▒█▒█▒█░▀▄█▒█▄▄░█▒▀█▒█▄▀
+  ░██▄░▀▄▀░░░▀█▀░█▄▒▄█░█▄█░▄▀▒░█▒░░█▄░█░█▀▄
+  ▒█▄█░▒█▒▒░░▒█▒░█▒▀▒█▒█▒█░▀▄█▒█▄▄░█▒▀█▒█▄▀
 
 - SEQUENTIALLY EVALUATE CODE FROM A TIMELINE -
 ```
 
-# Cue Code
+# ⏱ Cue Code
 
-Sequentially evaluate code snippets from a timeline. A tool to help the process of making creative coding compositions for music and visuals (or any other reason you might find this helpful!).
+Sequentially evaluate code snippets from a timeline. A tool to help the process of making creative coding compositions for music and visuals (or any other reason you might find this helpful!). It is inspired by the workflow of a DAW (Digital Audio Workstation) where sounds are placed on a timeline. In this project you place blocks of code on a timeline that can be edited individually. The timeline is vertical (like a tracker), mainly because this makes gives the code editor more space on the screen.
+
+This tool was mainly created for my personal usage when making compositions with the [Mercury live coding environment](https://mercury.timohoogland.com/), but you can surely fork and adapt this project for usage with other languages!
 
 [![](https://img.shields.io/static/v1?label=Join%20the%20Discord&message=%E2%9D%A4&logo=Discord)](https://discord.gg/vt59NYU)
 [![](https://img.shields.io/static/v1?label=Support%20on%20Ko-Fi&message=%E2%9D%A4&logo=Kofi)](https://ko-fi.com/I2I3SV7FX)
@@ -19,23 +21,58 @@ Sequentially evaluate code snippets from a timeline. A tool to help the process 
 
 ## 🚀 Install
 
-clone the repo
+1. download the repository with
 
-`git clone`
+`git clone https://github.com/tmhglnd/cue-code`
 
-install dependencies
+2. navigate to the folder and install dependencies
 
-`npm install`
+```
+cd cue-code
+npm install
+```
 
-start a local server
+3. start the server
 
 `node server.js`
 
-go to the browser at
+4. open a browser and go to
 
-`localhost:8001`
+`http://localhost:8001`
 
-## Usage
+## 🕹 Usage
+
+The interface consists of 4 areas: a timeline, a menubar, a code-editor and a clock display. Some shortkeys depend on the area you are focused on. You can focus on an area by clicking it with the mouse.
+
+### Timeline
+
+The timeline displays all the code-regions in your project.
+
+- Add an empty region: `option/alt``click` or click: *add region*
+- Add a region from file: `shift``click` or click: *add file* (multiple selection possible)
+- Move a region: `click` the region to select it, then `drag` up or down
+- Zoom the timeline: `ctrl``+` to zoom in, `ctrl``-` to zoom out
+- Scroll the timeline: `scroll` with the mousewheel or 2 fingers
+- Start/Pause playback: `space`
+- Reset playback to start: `enter`
+
+### Clock
+
+The clock on the bottom of the screen displays the time the playhead is located at in `minutes`:`seconds`.`milliseconds`.
+
+### Menubar
+
+- *add region* - add an empty region in the timeline
+- *add file* - add a region with code from a file (multiple selection possible)
+- *save* - export the current session in a `.json` format
+- *load* - import a session from a `.json` format
+- *theme* - select a theme for the editor from the drop-down menu
+
+### Editor
+
+The editor allows you to type code that is connected to a specific region in the timeline. First select the region you want to edit, then start typing code. When selecting another region the documents are automatically swapped.
+
+The syntax highlighting is by default `mercury`, although this highlighting also works quite okay for other languages such as JavaScript and C++. For other languages it also could work, but the `comment` is not correct if it is other than `//`. You can adjust the syntax in the code by including another mode for `CodeMirror`.
 
 ## 🔋 Powered By
 

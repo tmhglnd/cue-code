@@ -167,7 +167,7 @@ function keyPressed(){
 	}
 
 	// use W to return to the beginning
-	else if (key === 'w'){
+	else if (key === 'w' || key === ENTER){
 		transport.reset();
 	}
 	// use CTRL + to zoom in on the timeline
