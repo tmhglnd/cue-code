@@ -11,26 +11,25 @@
 
 # ⏱ Cue Code
 
-Sequentially evaluate code snippets from a timeline. A tool to help the process of making creative coding compositions for music and visuals (or any other reason you might find this helpful!). It is inspired by the workflow of a DAW (Digital Audio Workstation) where sounds are placed on a timeline. In this project you place blocks of code on a timeline that can be edited individually. The timeline is vertical (like a tracker), mainly because this makes gives the code editor more space on the screen.
+Sequentially evaluate code snippets from a timeline. A tool to help the process of making creative coding compositions for music and visuals (or any other reason you might find this helpful!). It is inspired by the workflow of a DAW (Digital Audio Workstation) where sounds are placed on a timeline. In this project you place blocks of code on a timeline that can be edited independently. The timeline is vertical (like a tracker), mainly because this makes gives the code editor more space on the screen. When the playhead reaches the code-block it triggers the evaluation. This will send the code as an OSC-message so it can be interpreted.
 
-This tool was mainly created for my personal usage when making compositions with the [Mercury live coding environment](https://mercury.timohoogland.com/), but you can surely fork and adapt this project for usage with other languages!
+This tool was mainly created for my personal use while making compositions with the [Mercury live coding environment](https://mercury.timohoogland.com/), but you can surely fork and adapt this project for usage with other languages! If you want to use this with the Mercury project, make sure you run Mercury [locally](https://tmhglnd.github.io/mercury/docs/getting-started#-without-internet) in order to be able to receive the osc-messages.
 
-[![](https://img.shields.io/static/v1?label=Join%20the%20Discord&message=%E2%9D%A4&logo=Discord)](https://discord.gg/vt59NYU)
+<!-- [![](https://img.shields.io/static/v1?label=Join%20the%20Discord&message=%E2%9D%A4&logo=Discord)](https://discord.gg/vt59NYU) -->
 [![](https://img.shields.io/static/v1?label=Support%20on%20Ko-Fi&message=%E2%9D%A4&logo=Kofi)](https://ko-fi.com/I2I3SV7FX)
 [![](https://img.shields.io/static/v1?label=Support%20on%20Patreon&message=%E2%9D%A4&logo=Patreon)](https://www.patreon.com/bePatron?u=9649817)
 
 ## 🚀 Install
 
-1. download the repository with
+1. download the repository
 
 `git clone https://github.com/tmhglnd/cue-code`
 
 2. navigate to the folder and install dependencies
 
-```
-cd cue-code
-npm install
-```
+`cd cue-code`
+
+`npm install`
 
 3. start the server
 
@@ -89,7 +88,7 @@ The clock on the bottom of the screen displays the time the playhead is located 
 
 #### Editor
 
-- Evaluate code directly: `Ctrl/Alt` `Enter`
+- Evaluate code immediately: `Ctrl/Alt` `Enter`
 
 The editor allows you to type code that is connected to a specific region in the timeline. First select the region you want to edit, then start typing code. When selecting another region the documents are automatically swapped.
 
