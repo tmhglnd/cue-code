@@ -44,9 +44,9 @@ let colors = {
 }
 
 // Ask if user is sure to close or refresh and loose all code
-// window.onbeforeunload = function() {
-// 	return "The session may be lost if you refresh. Are you sure?";
-// };
+window.onbeforeunload = function() {
+	return "The session may be lost if you refresh. Are you sure?";
+};
 
 // Initialize the P5 canvas for the timeline, timer and editor div
 function setup(){
@@ -125,6 +125,11 @@ function mousePressed(){
 
 	else if (transport.selectPlayhead()){ return; }
 
+	else if (keyIsDown(CONTROL) || keyIsDown('c')){
+		transport.setPlayHead();
+		return;
+	}
+
 	// Select a region with the mouse to edit the code or move it by dragging
 	else {
 		for (let r = regions.length-1; r >= 0; r--){
@@ -134,8 +139,6 @@ function mousePressed(){
 			}
 		}
 	}
-
-	transport.setPlayHead();
 }
 
 function mouseDragged(){

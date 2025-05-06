@@ -9,7 +9,7 @@
 - SEQUENTIALLY EVALUATE CODE FROM A TIMELINE -
 ```
 
-# ⏱ Cue Code
+# ⏱ CUE-CODE
 
 Sequentially evaluate code snippets from a timeline. A tool to help the process of making creative coding compositions for music and visuals (or any other reason you might find this helpful!). It is inspired by the workflow of a DAW (Digital Audio Workstation) where sounds are placed on a timeline. In this project you place blocks of code on a timeline that can be edited independently. The timeline is vertical (like a tracker), mainly because this makes gives the code editor more space on the screen. When the playhead reaches the code-block it triggers the evaluation. This will send the code as an OSC-message so it can be interpreted.
 
@@ -73,6 +73,8 @@ The timeline displays all the code-regions in your project.
 - Remove a region: `click` the region to select it, then press `backspace/delete`
 - Zoom the timeline: `ctrl` `+` to zoom in, `ctrl` `-` to zoom out
 - Scroll the timeline: `scroll` with the mousewheel or 2 fingers
+- Move the playhead: `click` on the playhead, then `drag` up or down
+- Go to time: `cmd/ctrl` `click` on the timeline to move the playhead immediately
 - Start/Pause playback: `space`
 - Reset playback to start: `enter`
 
