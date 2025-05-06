@@ -14,7 +14,14 @@ socket.on('connected', (id) => {
 	console.log(`Connected to server with id: ${id}`);
 });
 
+// change this to something you prefer, 
+// but make sure the mode is also included in the index.html, for example with:
+// <script src="./node_modules/codemirror/mode/javascript/javascript.js">
+// you can also create your custom syntax by copying and adapting the file:
+// /syntax/mercury-syntax.js
 let EDITOR_MODE = 'mercury';
+// the default startup theme for the editor
+let EDITOR_THEME = 'yonce';
 
 let gridheight = 200;
 let gridWidth = 200;
@@ -91,6 +98,7 @@ function draw(){
 	transport.playhead();
 	transport.timestamp();
 }
+
 
 // Various actions for when clicking with the mouse in the timeline
 function mousePressed(){
@@ -193,6 +201,7 @@ function wrap(a, lo, hi){
 // convert the current session to JSON format
 function sessionToJSON(){
 	let file = {
+		theme: editor.theme,
 		zoom: transport.zoomlevel,
 		tempo: transport.tempo,
 		regions: []
@@ -212,6 +221,8 @@ function sessionFromJSON(json){
 	// get all the info from the json
 	transport.zoomlevel = json.zoom;
 	transport.tempo = json.tempo;
+	editor.setTheme(json.theme);
+
 	// create new code regions with the info
 	json.regions.forEach((r) => {
 		regions.push(new Region(r.time, r.code, transport, r.id));
@@ -448,9 +459,9 @@ class Region {
 		if (this.y + this.h >= 0 && this.y < height){
 			stroke('black');
 			strokeWeight(2);
-			fill(255, 255, 255, 100);
+			fill(255, 255, 255, 90);
 			if (this.selected){
-				strokeWeight(2);
+				strokeWeight(5);
 				stroke(colors.accent);
 			}
 			rect(this.x, this.y, this.w, this.h);
@@ -528,9 +539,10 @@ class Editor {
 			'Alt-S' : () => { downloadSession() },
 		}
 		
+		this.theme = EDITOR_THEME;
+
 		// initialize the codemirror editor with some settings
 		this.cm = CodeMirror(document.getElementById('editor'), {
-			theme: 'material-darker',
 			mode: EDITOR_MODE,
 			value: '',
 			cursorHeight: 0.85,
@@ -551,16 +563,21 @@ class Editor {
 		this.themes = [ 'gruvbox-dark', 'material-darker', '3024-night', 'abbott', 'ayu-dark', 'ayu-mirage', 'base16-dark', 'bespin', 'blackboard', 'cobalt', 'material-ocean', 'monokai', 'moxer', 'panda-syntax', 'rubyblue', 'shadowfox', 'the-matrix', 'tomorrow-night-eighties', 'yonce' ].sort();
 
 		this.themeMenu = createSelect();
+		this.themeMenu.position(gridWidth + 400, 0);
 		for (var i = 0; i < this.themes.length; i++){
 			this.themeMenu.option(this.themes[i]);
 		}
-		this.themeMenu.position(gridWidth + 400, 0);
-		this.themeMenu.selected('material-darker');
 		this.themeMenu.elt.onchange = () => this.setTheme();
+		this.setTheme(this.theme);
 	}
 
-	setTheme(){
-		this.cm.setOption('theme', this.themeMenu.value());
+	setTheme(t){
+		this.theme = t;
+		if (!this.theme){
+			this.theme = this.themeMenu.value();
+		}
+		this.themeMenu.selected(this.theme);
+		this.cm.setOption('theme', this.theme);
 		let s = this.getStyle();
 
 		colors.background = s['background-color'];
