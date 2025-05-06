@@ -112,6 +112,7 @@ function mousePressed(){
 	// Add one/multiple regions from a file with Shift + Click
 	if (keyIsDown(SHIFT)){
 		addFiles();
+		return;
 	}
 
 	// Add an empty region with Option + Click
@@ -119,6 +120,7 @@ function mousePressed(){
 		// let pos = transport.pixelToMs(mouseY);
 		// regions.push(new Region(pos, '', transport));
 		addRegion(mouseY);
+		return;
 	}
 
 	else if (transport.selectPlayhead()){ return; }
@@ -187,6 +189,14 @@ function keyPressed(){
 		loadSession();
 	}
 
+	else if (key === BACKSPACE || key === DELETE){
+		for (let r = 0; r < regions.length; r++){
+			if (regions[r].select()) {
+				regions.splice(r, 1);
+				return;
+			}
+		}
+	}
 	// console.log(key);
 }
 
