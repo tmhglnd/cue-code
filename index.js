@@ -101,13 +101,13 @@ function draw(){
 
 
 // Various actions for when clicking with the mouse in the timeline
-function mousePressed(){
-	// deselect all regions
-	regions.forEach(r => r.selected = false);
+function mousePressed(){	
 	transport.selected = false;
-
+	
 	// if mouse is clicked outside timeline ignore
 	if (mouseX < 0 || mouseX > gridWidth){ return; }
+
+	deselectAll();
 
 	// Add one/multiple regions from a file with Shift + Click
 	if (keyIsDown(SHIFT)){
@@ -142,6 +142,9 @@ function mousePressed(){
 }
 
 function mouseDragged(){
+	// if mouse is clicked outside timeline ignore
+	if (mouseX < 0 || mouseX > gridWidth){ return; }
+
 	// if the mouse is dragged and a region is selected, move it
 	regions.forEach(r => r.move());
 
@@ -213,6 +216,13 @@ function windowResized(){
 function wrap(a, lo, hi){
 	let r = hi - lo;
 	return ((((a - lo) % r) + r) % r) + lo;
+}
+
+function deselectAll(){
+	// deselect the transport playhead
+	transport.selected = false;
+	// deselect all regions
+	regions.forEach(r => r.selected = false);
 }
 
 // convert the current session to JSON format
@@ -300,7 +310,6 @@ function addFiles(){
 // if no y is provided, randomly generate a position
 function addRegion(y, txt=''){
 	if (y === undefined){ y = random(height); }
-	console.log(y, txt);
 	regions.push(new Region(transport.pixelToMs(y), txt, transport));
 }
 
@@ -470,7 +479,7 @@ class Region {
 
 		this.selected = false;
 		this.selectionOffset = [ 0, 0 ];
-		this.isPlaying = false;
+		this.playFlash = false;
 		this._playhead = -1;
 
 		this.code = CodeMirror.Doc(txt, EDITOR_MODE);
@@ -492,12 +501,17 @@ class Region {
 			}
 			rect(this.x, this.y, this.w, this.h);
 			// display a flashing white image when the region is triggered
-			if (this.isPlaying > 0){
-				fill(255, 255, 255, this.isPlaying * 255);
+			if (this.playFlash > 0){
+				fill(255, 255, 255, this.playFlash * 255);
 				// fill(colors.accent);
 				rect(this.x, this.y, this.w, this.h);
-				this.isPlaying -= 0.02;
+				this.playFlash -= 0.02;
 			}
+			strokeWeight(2);
+			fill(colors.background);
+			textSize(14);
+			textAlign(LEFT, TOP);
+			text(`id: ${this.id}`, this.x+5, this.y+5);
 		}
 	}
 
@@ -505,7 +519,9 @@ class Region {
 		// if the playhead was before the time of the region, and
 		// then moved over the time or equal to the time, trigger the play
 		if (this._playhead < this.time && playhead >= this.time){
-			this.isPlaying = 1;
+			this.playFlash = 1;
+			deselectAll();
+			this.selected = true; 
 			evaluate(this.code.getValue());
 			editor.swapDoc(this.code);
 			console.log('eval:', this.getJSON());
