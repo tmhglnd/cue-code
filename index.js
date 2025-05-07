@@ -27,6 +27,7 @@ let gridheight = 200;
 let gridWidth = 150;
 
 let regions = [];
+let regionID = 0;
 let transport;
 let editor;
 
@@ -469,7 +470,7 @@ class Transport {
 // It is also connected to the global transport so it knows when to play
 class Region {
 	constructor(t=0, txt='', transport, id){
-		this.id = id ? id : Math.floor(Math.random() * 10000);
+		this.id = id ? id : regionID++;
 
 		this.x = 0;
 		this.y = 0;
@@ -519,10 +520,12 @@ class Region {
 		// if the playhead was before the time of the region, and
 		// then moved over the time or equal to the time, trigger the play
 		if (this._playhead < this.time && playhead >= this.time){
+			// send evaluation immediately
+			evaluate(this.code.getValue());
+			// display a flash, make the block selected, display the code
 			this.playFlash = 1;
 			deselectAll();
-			this.selected = true; 
-			evaluate(this.code.getValue());
+			this.selected = true;
 			editor.swapDoc(this.code);
 			console.log('eval:', this.getJSON());
 		}
