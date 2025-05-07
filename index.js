@@ -85,7 +85,6 @@ function setup(){
 // Trigger a region if the playhead passes it
 function draw(){
 	background(colors.background);
-	// background(editor.getStyle()['background-color']);
 	
 	// draw the grid and progress the playhead when playing
 	transport.grid();
@@ -152,7 +151,7 @@ function mouseDragged(){
 
 	// if the mouse is dragged and a region is selected, move it
 	regions.forEach(r => r.move());
-
+	// or move the playhead if selected
 	transport.movePlayHead();
 }
 
@@ -397,7 +396,7 @@ class Transport {
 	}
 
 	zoomOut(){
-		this.zoomlevel *= 1.05;
+		this.zoomlevel = Math.min(10000, this.zoomlevel * 1.05);
 	}
 
 	moveFocus(delta){
@@ -405,30 +404,16 @@ class Transport {
 	}
 
 	focusTo(y){
+		// to do, focus to a location
 		// this.focus = this.pixelToMs(y) / this.zoomlevel;
 		// this.focus = (y + this.focus) / this.zoomlevel;
 	}
 
  	grid(){
-		let stepsize = 1000;
-		// let highlight = 0;
-		// console.log(Math.log(this.zoomlevel/5)/Math.log(5));
-
-		if (this.zoomlevel < 5){
-			stepsize = 250 / this.zoomlevel;
-		} else if (this.zoomlevel < 50){
-			// highlight = 5;
-			stepsize = 1000 / this.zoomlevel;
-		} else if (this.zoomlevel < 500){
-			// highlight = 6;
-			stepsize = 10000 / this.zoomlevel;
-		} else if (this.zoomlevel < 5000){
-			// highlight = 10;
-			stepsize = 60000 / this.zoomlevel;
-		} else {
-			// highlight = 60;
-			stepsize = 600000 / this.zoomlevel;
-		} 
+		// various levels of zoom and the lines drawn
+		let zoomstep = Math.floor(Math.log10(this.zoomlevel / 5)) + 1;
+		let steps = [250, 1000, 10000, 60000, 600000 ];
+		let stepsize = steps[zoomstep] / this.zoomlevel;
 
 		let numlines = Math.ceil(height / stepsize);
 
@@ -628,7 +613,7 @@ class Editor {
 		for (var i = 0; i < this.themes.length; i++){
 			this.themeMenu.option(this.themes[i]);
 		}
-		this.themeMenu.elt.title = 'Change the editor theme';
+		this.themeMenu.elt.title = 'change the editor theme';
 		this.themeMenu.elt.onchange = () => this.setTheme();
 		this.setTheme(this.theme);
 	}
