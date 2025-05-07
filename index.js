@@ -354,6 +354,7 @@ class Transport {
 
 	reset(){
 		transport.position = 0;
+		transport.focus = 0;
 		regions.forEach((r) => r._playhead = -1);
 	}
 
@@ -362,10 +363,10 @@ class Transport {
 			this.position += (millis() - this.prevTime);
 			this.prevTime = millis();
 			// if playhead moves outside screen, focus to it
-			let p = transport.msToPixel(this.position);
-			if (p < -100 || p > height + 100){
-				this.focus += height;
-			}
+			// let p = transport.msToPixel(this.position);
+			// if (p < -10 || p > height + 10){
+			// 	this.focus += height;
+			// }
 		}
 	}
 
