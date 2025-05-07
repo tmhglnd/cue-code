@@ -14,6 +14,11 @@ socket.on('connected', (id) => {
 	console.log(`Connected to server with id: ${id}`);
 });
 
+// Ask if user is sure to close or refresh and loose all code
+window.onbeforeunload = function() {
+	return "The session may be lost if you refresh. Are you sure?";
+};
+
 // change this to something you prefer, 
 // but make sure the mode is also included in the index.html, for example with:
 // <script src="./node_modules/codemirror/mode/javascript/javascript.js">
@@ -43,11 +48,6 @@ let colors = {
 	primairy: 'darkgrey',
 	secundairy: 'grey'
 }
-
-// Ask if user is sure to close or refresh and loose all code
-window.onbeforeunload = function() {
-	return "The session may be lost if you refresh. Are you sure?";
-};
 
 // Initialize the P5 canvas for the timeline, timer and editor div
 function setup(){
@@ -129,6 +129,7 @@ function mousePressed(){
 
 	else if (transport.selectPlayhead()){ return; }
 
+	// Hold d and click to place playhead immediately to that location
 	else if (keyIsDown('d')){
 		transport.setPlayHead();
 		return;
@@ -291,19 +292,29 @@ function loadSession(){
 
 // add one or multiple files to the session
 function addFiles(){
-	let mousePos = mouseY;
+	let y = transport.msToPixel(transport.position);
 	let input = document.createElement('input');
 	input.style.display = 'none';
 	input.type = 'file';
 	input.multiple = true;
 	input.onchange = (e) => {
+		// let basetime = 0;
 		for (let i = 0; i < e.target.files.length; i++){
 			let read = new FileReader();
 			read.onload = (f) => {
 				// let pos = transport.pixelToMs(mousePos + i * 100);
 				// regions.push(new Region(pos, f.target.result, transport));
-				addRegion(mousePos + i * 100, f.target.result)
+				addRegion(y + i * 100, f.target.result)
 			};
+			// let time = timestampFromFile(e.target.files[i]);
+			// if (time && i === 0){ basetime = time }
+			// if (!time){
+				
+			// }
+			// time -= basetime;
+			// if (time < 0){ console.log('selected files in opposite order?') }
+			// console.log('name', e.target.files[i].name, 'time', time);
+
 			read.readAsText(e.target.files[i]);
 		}
 	}
@@ -670,4 +681,24 @@ function date(){
 	let mi = String(now.getMinutes()).padStart(2, '0');
 	let ss = String(now.getSeconds()).padStart(2, '0');
 	return `${yyyy}-${mm}-${dd}_${hh}.${mi}.${ss}`;
+}
+
+function timestampFromFile(file){
+	// match digits in the filename, should be in order like:
+	// yyyy-mm-dd_hh-mm-ss
+	let d = file.name.match(/(\d+)/g);
+	let logtime = '';		
+	if (d){
+		d.push('000');
+		logtime = `${d[0]}-${d[1]}-${d[2]}T${d[3]}:${d[4]}:${d[5]}.${d[6]}`;
+		logtime = Date.parse(logtime);
+	}
+
+	// if the timestamp is invalid or no stamp was detected use the
+	// the specified option --length= in seconds
+	if (isNaN(logtime) || !d){
+		console.log('no time stamp in filename detected');
+		logtime = null;
+	}
+	return logtime;
 }
