@@ -11,7 +11,7 @@
 
 # ⏱ CUE-CODE
 
-Sequentially evaluate code snippets from a timeline. A tool to help the process of making creative coding compositions for music and visuals (or any other reason you might find this helpful!). It is inspired by the workflow of a DAW (Digital Audio Workstation) where sounds are placed on a timeline. In this project you place blocks of code on a timeline that can be edited independently. The timeline is vertical (like a tracker), mainly because this makes gives the code editor more space on the screen. When the playhead reaches the code-block it triggers the evaluation. This will send the code as an OSC-message so it can be interpreted.
+Sequentially evaluate code snippets from a timeline. A tool to help the process of making creative coding compositions for music and visuals (or any other reason you might find this helpful!). It is inspired by the workflow of a DAW (Digital Audio Workstation) where sounds are placed on a timeline. In this project you place blocks of code on a timeline that can be edited independently. The timeline is vertical (like a tracker), mainly to give the code editor more space on the screen. When the playhead reaches the code-block it triggers the evaluation. This will send the code as an OSC-message so it can be interpreted elsewhere.
 
 This tool was mainly created for my personal use while making compositions with the [Mercury live coding environment](https://mercury.timohoogland.com/), but you can surely fork and adapt this project for usage with other languages! If you want to use this with the Mercury project, make sure you run Mercury [locally](https://tmhglnd.github.io/mercury/docs/getting-started#-without-internet) in order to be able to receive the osc-messages.
 
@@ -74,7 +74,7 @@ The timeline displays all the code-regions in your project.
 - Zoom the timeline: `ctrl` `+` to zoom in, `ctrl` `-` to zoom out
 - Scroll the timeline: `scroll` with the mousewheel or 2 fingers
 - Move the playhead: `click` on the playhead, then `drag` up or down
-- Go to time: `cmd/ctrl` `click` on the timeline to move the playhead immediately
+- Go to time: Hold `d` and `click` on the timeline to move the playhead immediately
 - Start/Pause playback: `space`
 - Reset playback to start: `enter`
 
@@ -84,7 +84,7 @@ The clock on the bottom of the screen displays the time the playhead is located 
 
 #### Menubar
 
-- *add region* - add an empty region in the timeline
+- *add region* - add an empty region in the timeline on the playhead location
 - *add file* - add a region with code from a file (multiple selection possible)
 - *save* - export the current session in a `.json` format
 - *load* - import a session from a `.json` format

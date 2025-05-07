@@ -62,18 +62,22 @@ function setup(){
 	addBtn = createButton('add region');
 	addBtn.position(gridWidth, 0);
 	addBtn.mousePressed(() => addRegion());
+	addBtn.elt.title = 'add an empty code region at the playhead position';
 
 	fileBtn = createButton('add file');
 	fileBtn.position(gridWidth + 100, 0);
 	fileBtn.mousePressed(addFiles);
+	fileBtn.elt.title = 'add a region from one or multiple code files';
 
 	saveBtn = createButton('save');
 	saveBtn.position(gridWidth + 200, 0);
 	saveBtn.mousePressed(downloadSession);
+	saveBtn.elt.title = 'save the current session to downloads';
 
 	loadBtn = createButton('load');
 	loadBtn.position(gridWidth + 300, 0);
 	loadBtn.mousePressed(loadSession);
+	loadBtn.elt.title = 'load a session from a .json file';
 }
 
 // Refresh and draw the timeline and regions 
@@ -126,7 +130,7 @@ function mousePressed(){
 
 	else if (transport.selectPlayhead()){ return; }
 
-	else if (keyIsDown(CONTROL) || keyIsDown('c')){
+	else if (keyIsDown('d')){
 		transport.setPlayHead();
 		return;
 	}
@@ -310,7 +314,7 @@ function addFiles(){
 // add a region based on y pixel location with code
 // if no y is provided, randomly generate a position
 function addRegion(y, txt=''){
-	if (y === undefined){ y = random(height); }
+	if (y === undefined){ y = transport.msToPixel(transport.position); }
 	regions.push(new Region(transport.pixelToMs(y), txt, transport));
 }
 
@@ -357,6 +361,11 @@ class Transport {
 		if (this.running){
 			this.position += (millis() - this.prevTime);
 			this.prevTime = millis();
+			// if playhead moves outside screen, focus to it
+			let p = transport.msToPixel(this.position);
+			if (p < -100 || p > height + 100){
+				this.focus += height;
+			}
 		}
 	}
 
@@ -440,6 +449,7 @@ class Transport {
 		// noStroke();
 		stroke(colors.accent);
 		strokeWeight(2);
+		textStyle(NORMAL);
 		fill(colors.accent);
 		textFont('courier new');
 		
@@ -508,11 +518,12 @@ class Region {
 				rect(this.x, this.y, this.w, this.h);
 				this.playFlash -= 0.02;
 			}
-			strokeWeight(2);
+			noStroke();
 			fill(colors.background);
 			textSize(14);
+			textStyle(BOLD);
 			textAlign(LEFT, TOP);
-			text(`id: ${this.id}`, this.x+5, this.y+5);
+			text(`ID: ${this.id}`, this.x+5, this.y+5);
 		}
 	}
 
@@ -582,6 +593,8 @@ class Editor {
 			'Ctrl-Enter': () => { evaluate(this.cm.getValue()) },
 			'Ctrl-S' : () => { downloadSession() },
 			'Alt-S' : () => { downloadSession() },
+			'Ctrl-O' : () => { loadSession() },
+			'Alt-O' : () => { loadSession() },
 		}
 		
 		this.theme = EDITOR_THEME;
@@ -614,6 +627,7 @@ class Editor {
 		for (var i = 0; i < this.themes.length; i++){
 			this.themeMenu.option(this.themes[i]);
 		}
+		this.themeMenu.elt.title = 'Change the editor theme';
 		this.themeMenu.elt.onchange = () => this.setTheme();
 		this.setTheme(this.theme);
 	}
